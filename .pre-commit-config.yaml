@@ -16,7 +16,7 @@ repos:
       - id: rst-inline-touching-normal
       - id: text-unicode-replacement-char
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-added-large-files
       - id: check-ast
@@ -41,15 +41,13 @@ repos:
       - id: mixed-line-ending
       - id: trailing-whitespace
         types: [python]
-  - repo: local
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.17.0 # Use the latest version or a specific version
     hooks:
       - id: commitizen
-        name: commitizen
-        entry: cz check
-        args: [--commit-msg-file]
-        require_serial: true
-        language: system
         stages: [commit-msg]
+  - repo: local
+    hooks:
       - id: qa
         name: qa
         entry: task qa
@@ -58,7 +56,7 @@ repos:
         pass_filenames: false
         types: [ python ]
   - repo: https://github.com/pappasam/toml-sort
-    rev: v0.24.2
+    rev: v0.24.4
     hooks:
         - id: toml-sort-fix
           name: toml-sort-fix
