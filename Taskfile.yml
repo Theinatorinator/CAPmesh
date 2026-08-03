@@ -1,8 +1,12 @@
+# SPDX-FileCopyrightText: 2026 Logan Mamanakis Logan.Mamanakis@gmail.com>
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 version: "3"
 
 vars:
   ALL: . tests/
-  VENV: .venv/bin
+  VENV: '{{if eq OS "windows"}}.venv/Scripts{{else}}.venv/bin{{end}}'
   SOURCES: ./
 
 tasks:
@@ -22,9 +26,9 @@ tasks:
   coverage:
     desc: "Open the latest coverage report in a web browser"
     cmds:
-      - open tests/coverage/index.html
+      - cmd: '{{if eq OS "darwin"}}open{{else if eq OS "windows"}}cmd /c start{{else}}xdg-open{{end}} tests/coverage/index.html'
 
-  # Task to run all linting tasks (isort, mypy)
+  # Task to run all linting tasks (ruff, mypy)
   lint:
     desc: "Run all linting tasks"
     deps:
@@ -48,4 +52,4 @@ tasks:
   test:
     desc: "Run tests with coverage"
     cmds:
-      - pytest -vv --cov --cov-report=html:tests/coverage --cov-fail-under=95 $(if [ -n "{{.CLI_ARGS}}" ]; then echo "{{.CLI_ARGS}}"; else echo .; fi)
+      - pytest -vv --cov --cov-report=html:tests/coverage --cov-fail-under=95 {{if .CLI_ARGS}}{{.CLI_ARGS}}{{else}}.{{end}}
