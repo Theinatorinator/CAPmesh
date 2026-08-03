@@ -12,5 +12,5 @@ TEST_S3_BUCKET = "test-bucket"
 
 
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
-    """Randomise the order of tests to avoid flakiness."""
-    random.shuffle(items)
+  """Randomise the order of tests to avoid flakiness."""
+  random.shuffle(items)

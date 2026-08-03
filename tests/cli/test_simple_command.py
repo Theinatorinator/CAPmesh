@@ -10,19 +10,21 @@ from capmesh.cli.__main__ import cli
 
 
 def test_simple_command_help(cli_runner: CliRunner, cli_env: None) -> None:
-    """Test help command"""
-    result = cli_runner.invoke(cli, ["simple-command", "--help"])
-    assert result.exit_code == 0
-    assert "simple-command [OPTIONS] SOME_ARGUMENT" in result.output
+  """Test help command"""
+  result = cli_runner.invoke(cli, ["simple-command", "--help"])
+  assert result.exit_code == 0
+  assert "simple-command [OPTIONS] SOME_ARGUMENT" in result.output
 
 
-def test_simple_command_exception_handling(cli_runner: CliRunner, cli_env: None) -> None:
-    """Test exception handling when app_context access fails"""
-    # Mock the ctx.obj to raise an exception when accessed
-    with patch("capmesh.cli.simple_command.click.echo") as mock_echo:
-        mock_echo.side_effect = Exception("Mocked exception")
+def test_simple_command_exception_handling(
+  cli_runner: CliRunner, cli_env: None
+) -> None:
+  """Test exception handling when app_context access fails"""
+  # Mock the ctx.obj to raise an exception when accessed
+  with patch("capmesh.cli.simple_command.click.echo") as mock_echo:
+    mock_echo.side_effect = Exception("Mocked exception")
 
-        result = cli_runner.invoke(cli, ["simple-command", "test_arg"], obj=None)
+    result = cli_runner.invoke(cli, ["simple-command", "test_arg"], obj=None)
 
-        # The command should exit with code 1 due to the exception
-        assert result.exit_code == 1
+    # The command should exit with code 1 due to the exception
+    assert result.exit_code == 1

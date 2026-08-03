@@ -112,6 +112,15 @@ wheels = [
 ]
 
 [[package]]
+name = "blinker"
+version = "1.9.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/21/28/9b3f50ce0e048515135495f198351908d99540d69bfdc8c1d15b73dc55ce/blinker-1.9.0.tar.gz", hash = "sha256:b4ce2265a7abece45e7cc896e98dbebe6cead56bcf805a3d23136d145f5445bf", size = 22460, upload-time = "2024-11-08T17:25:47.436Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/10/cb/f2ad4230dc2eb1a74edf38f1a38b9b52277f75bef262d8908e60d957e13c/blinker-1.9.0-py3-none-any.whl", hash = "sha256:ba0efaa9080b619ff2f3459d1d500c57bddea4a6b424b60a91141db6fd2f08bc", size = 8458, upload-time = "2024-11-08T17:25:46.184Z" },
+]
+
+[[package]]
 name = "cap-tools"
 version = "3.1.1"
 source = { registry = "https://pypi.org/simple" }
@@ -130,6 +139,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "apscheduler" },
+    { name = "blinker" },
     { name = "cap-tools" },
     { name = "click" },
     { name = "httpx" },
@@ -138,6 +148,7 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "python-dateutil" },
     { name = "rich" },
+    { name = "rule-engine" },
     { name = "sqlmodel" },
     { name = "tenacity" },
 ]
@@ -165,6 +176,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "apscheduler", specifier = ">=3.11.3" },
+    { name = "blinker", specifier = ">=1.9.0" },
     { name = "cap-tools", specifier = ">=3.1.1" },
     { name = "click", specifier = ">=8.1.7" },
     { name = "httpx", specifier = ">=0.28.1" },
@@ -173,6 +185,7 @@ requires-dist = [
     { name = "pydantic-settings", specifier = ">=2.6.1" },
     { name = "python-dateutil", specifier = ">=2.9.0.post0" },
     { name = "rich", specifier = ">=14" },
+    { name = "rule-engine", specifier = ">=5.0.2" },
     { name = "sqlmodel", specifier = ">=0.0.39" },
     { name = "tenacity", specifier = ">=9.1.4" },
 ]
@@ -1535,6 +1548,18 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/fc/8a/fb22af2fd78a736e241fabf67e30ce1799a64244026377a49e133af90762/ruff-0.16.1-py3-none-win32.whl", hash = "sha256:d31765e131295b8445caf301e3e8a85b34d1b9b211b4109b7ba457888b051806", size = 10838258, upload-time = "2026-07-30T19:36:53.298Z" },
     { url = "https://files.pythonhosted.org/packages/d4/35/e57fd9fb5d423961df087a00b12d42c0a830288dc2f3b45ecca299158b4f/ruff-0.16.1-py3-none-win_amd64.whl", hash = "sha256:09b05e8b90c2cb06ad63464350e7a45e8e44a2dfe52072ebfba6666ca8d3f596", size = 11961111, upload-time = "2026-07-30T19:36:56.107Z" },
     { url = "https://files.pythonhosted.org/packages/cb/46/240ea004bf6dc4feb40e9832f2205a476a47dd5b8a3f8211a5fc5f95e20e/ruff-0.16.1-py3-none-win_arm64.whl", hash = "sha256:dbaadaac38c70239f056d306b7476f246b0bf000fa6b3876402acbf5b227eaf8", size = 11309414, upload-time = "2026-07-30T19:36:58.79Z" },
+]
+
+[[package]]
+name = "rule-engine"
+version = "5.0.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "python-dateutil" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ef/1e/b77a11130c48cc37ba6a64f0fe8b6c5585923975d4cc8f5184cf5f7172dc/rule_engine-5.0.2.tar.gz", hash = "sha256:dd871030a2eee062f3869fa952c3b93dbf56b21c8c01b73ca71e4c3ac8c5a4ea", size = 95940, upload-time = "2026-07-08T00:11:06.59Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/77/b5/d81a48d940e0266974b37fea1a5ebaff8d88735fbded899ce1cc043be682/rule_engine-5.0.2-py3-none-any.whl", hash = "sha256:93e3bc62742a3463d8361071c4e6b3c6d55393835822825375b2ed9d766141d7", size = 135032, upload-time = "2026-07-08T00:11:05.174Z" },
 ]
 
 [[package]]
