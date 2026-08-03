@@ -14,15 +14,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v9
+        uses: astral-sh/setup-uv@v9.0.0
         with:
           enable-cache: "auto"
 
       - name: Install Task
-        uses: go-task/setup-task@v2
+        uses: go-task/setup-task@v2.1.0
 
       - name: Prepare UV environment
         run: uv sync --all-groups --all-extras
