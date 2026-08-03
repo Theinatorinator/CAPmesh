@@ -1,0 +1,31 @@
+name: QA
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  qa:
+    name: Code QA
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v9
+        with:
+          enable-cache: "auto"
+
+      - name: Install Task
+        uses: go-task/setup-task@v2
+
+      - name: Prepare UV environment
+        run: uv sync --all-groups --all-extras
+
+      - name: QA task
+        run: task qa
