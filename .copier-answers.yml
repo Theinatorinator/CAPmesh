@@ -1,0 +1,14 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: d461a17
+_src_path: https://github.com/gotofritz/copier-python-template
+author_email: 98051141+Theinatorinator@users.noreply.github.com
+author_name: theinatorinator
+cli: true
+org_name: theinatorinator
+package_name: capmesh
+project_description: Collects CAP based messages from various sources, prepares them,
+    and disseminates them to Mesh networks or other local networks.
+project_name: CAPmesh
+project_url: https://github.com/theinatorinator/CAPmesh
+python_version: '3.13'
+with_conventional_commits: true

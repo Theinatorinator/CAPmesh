@@ -1,0 +1,203 @@
+# 🚀  CAPmesh
+
+Collects CAP based messages from various sources, prepares them, and disseminates them to Mesh networks or other local networks.
+
+## 📋 Overview
+
+ CAPmesh is a Python application/package that demonstrates modern Python development practices with fast dependency management, comprehensive testing, and automated quality checks.
+
+## 🎁 Features
+
+- 📦 **Modern Python packaging** using [UV](https://github.com/astral-sh/uv) for lightning-fast dependency management
+- ⚡️ **Streamlined task execution** with [Task](https://taskfile.dev/)
+- ✍️ **Code formatting and linting** with [Ruff](https://github.com/charliermarsh/ruff)
+- 🔍 **Type checking** with [Mypy](https://github.com/python/mypy)
+- 🛡️ **Quality gates** with [Pre-commit](https://pre-commit.com/) hooks
+- 🏷️ **Automated versioning** following [Conventional Commits](https://www.conventionalcommits.org/) with [Commitizen](https://github.com/commitizen-tools/commitizen)
+- 📋 **Changelog generation** compatible with [Keep A Changelog](https://keepachangelog.com/)
+- 🔄 **Continuous integration** with [GitHub Actions](https://docs.github.com/en/actions)
+- ✅ **Comprehensive testing** with pytest and coverage reporting
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.13+
+- [UV](https://github.com/astral-sh/uv) installed globally
+
+### Installation
+
+1. **Clone the repository:**
+
+   ```sh
+   git clone https://github.com/theinatorinator/CAPmesh.git
+   cd  CAPmesh
+   ```
+
+2. **Install dependencies:**
+
+   ```sh
+   uv sync
+   ```
+
+3. **Activate the virtual environment:**
+
+   ```sh
+   # On Unix/macOS
+   source .venv/bin/activate
+
+   # On Windows
+   .venv\Scripts\activate
+   ```
+
+### Development Setup
+
+1. **Install pre-commit hooks:**
+
+   ```sh
+   pre-commit install
+   ```
+
+2. **Run the test suite:**
+
+   ```sh
+   task test
+   ```
+
+3. **Check code quality:**
+
+   ```sh
+   task qa
+   ```
+
+## 🖥️ CLI Usage
+
+ CAPmesh includes a command-line interface for easy interaction:
+
+```sh
+# Show available commands
+uv run CAPmesh --help
+
+# Run a simple command
+uv run CAPmesh simple-command "hello world"
+
+# Use subcommands
+uv run CAPmesh subcommand --help
+```
+
+Example usage:
+```sh
+❯ uv run CAPmesh --help
+Usage: CAPmesh [OPTIONS] COMMAND [ARGS]...
+
+  Main entry point for the CLI.
+
+Options:
+  -v, --version  Show the version and exit.
+  -h, --help     Show this message and exit.
+
+Commands:
+  simple-command  This is a simple command.
+  subcommand      This contains sub-subcommands
+```
+
+## 🛠️ Development
+
+### Available Commands
+
+This project uses various tools for development. Here are the most common commands:
+
+```sh
+# Install dependencies
+uv sync
+
+# Run tests with coverage
+task test
+
+# open the code coverage in a web browser
+task coverage
+
+# Format code with ruff
+task lint-fix
+
+# Lint code
+task qa
+
+# Run pre-commit on all files
+uv run pre-commit run --all-files
+```
+
+### Project Structure
+
+```
+CAPmesh/
+├── CAPmesh/                  # Main package
+│   ├── cli/               # CLI commands
+│   └── ...                # Other modules
+├── tests/                 # Test suite
+├── pyproject.toml        # Project configuration
+└── README.md             # This file
+```
+
+### Making Changes
+
+1. **Create a feature branch:**
+
+   ```sh
+   git checkout -b feature/your-feature-name
+   ```
+
+2. **Make your changes** and ensure tests pass:
+
+   ```sh
+   uv run pytest
+   ```
+
+3. **Commit using conventional commits:**
+
+   ```sh
+   git commit -m "feat: add new feature"
+   ```
+
+4. **Push and create a pull request.**
+
+### Versioning
+
+This project follows [Semantic Versioning](https://semver.org/) and uses [Conventional Commits](https://www.conventionalcommits.org/) for automated changelog generation.
+
+To create a new release:
+
+```sh
+uv run cz bump
+git push --follow-tags
+```
+
+## 🧪 Testing
+
+Run the full test suite:
+
+```sh
+# Run all tests
+task test
+```
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass and code quality checks succeed
+6. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🔗 Links
+
+- **Homepage:** [https://github.com/theinatorinator/CAPmesh](https://github.com/theinatorinator/CAPmesh)
+- **Documentation:** [https://github.com/theinatorinator/CAPmesh](https://github.com/theinatorinator/CAPmesh)
+- **Issues:** [https://github.com/theinatorinator/CAPmesh/issues](https://github.com/theinatorinator/CAPmesh/issues)
+- **Changelog:** [CHANGELOG.md](CHANGELOG.md)
+
