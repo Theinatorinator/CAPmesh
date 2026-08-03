@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2026 Logan Mamanakis Logan.Mamanakis@gmail.com>
+# SPDX-FileCopyrightText: 2026 Logan Mamanakis <Logan.Mamanakis@gmail.com>
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -11,17 +11,17 @@ name = "CAPmesh"
 version = "0.1.0"
 description = "Collects CAP based messages from various sources, prepares them, and disseminates them to Mesh networks or other local networks."
 authors = [
-    { name = "Logan Mamanakis", email = "Logan.Mamanakis@gmail.com" }
+  {name = "Logan Mamanakis", email = "Logan.Mamanakis@gmail.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.13"
 license = "AGPL-3.0-or-later"
-license-files = [ "LICENSE" ]
+license-files = ["LICENSE"]
 dependencies = [
   "pydantic>=2.10.6",
   "pydantic-settings>=2.6.1",
   "click>=8.1.7",
-  "rich>=14",
+  "rich>=14"
 ]
 
 [project.urls]
@@ -36,30 +36,31 @@ CAPmesh = "capmesh.cli.__main__:cli"
 
 [dependency-groups]
 dev = [
-    "copier>=9.7.1,<10",
-    "commitizen>=3,<4",
-    "faker>=30,<31",
-    "mypy>=1,<2",
-    "polyfactory>=2,<3",
-    "pre-commit>=3,<4",
-    "pytest>=8,<9",
-    "pytest-cov>=5,<6",
-    "pytest-datadir>=1,<2",
-    "pytest-env>=1,<2",
-    "ruff>=0.5,<0.6",
-    "toml-sort>=0.24.2,<0.25",
-    "safety>=3.2.9,<4",
+  "copier>=9.7.1,<10",
+  "commitizen>=3,<4",
+  "faker>=30,<31",
+  "mypy>=1,<2",
+  "polyfactory>=2,<3",
+  "pre-commit>=3,<4",
+  "pytest>=8,<9",
+  "pytest-cov>=5,<6",
+  "pytest-datadir>=1,<2",
+  "pytest-env>=1,<2",
+  "ruff>=0.5,<0.6",
+  "toml-sort>=0.24.2,<0.25",
+  "safety>=3.2.9,<4"
 ]
 
 [tool.uv]
 required-version = ">=0.8.4"
-[tool.commitizen]  # https://commitizen-tools.github.io/commitizen/config/
+
+[tool.commitizen] # https://commitizen-tools.github.io/commitizen/config/
 bump_message = "bump(release): v$current_version → v$new_version"
 tag_format = "v$version"
 update_changelog_on_bump = true
 version_provider = "pep621"
 
-[tool.mypy]  # https://mypy.readthedocs.io/en/latest/config_file.html
+[tool.mypy] # https://mypy.readthedocs.io/en/latest/config_file.html
 exclude = []
 strict = true
 disallow_subclassing_any = false
@@ -72,20 +73,21 @@ show_error_codes = true
 show_error_context = true
 warn_unreachable = true
 
-[tool.pytest.ini_options]  # https://docs.pytest.org/en/latest/reference/reference.html#ini-options-ref
+[tool.pytest.ini_options] # https://docs.pytest.org/en/latest/reference/reference.html#ini-options-ref
 pythonpath = [
-  ".", "capmesh",
+  ".",
+  "capmesh"
 ]
 testpaths = [
-    "tests",
+  "tests"
 ]
 addopts = [
-    "--cov=capmesh/",
-    "--cov-report=term",
-    "--cov-report=html:coverage/html",
-    "--cov-report=xml:coverage/coverage.xml",
-    "--junitxml=coverage/junit/test-results.xml",
-    "--color=yes"
+  "--cov=capmesh/",
+  "--cov-report=term",
+  "--cov-report=html:coverage/html",
+  "--cov-report=xml:coverage/coverage.xml",
+  "--junitxml=coverage/junit/test-results.xml",
+  "--color=yes"
 ]
 
 [tool.pytest_env]
@@ -93,13 +95,13 @@ ENVIRONMENT = "test"
 
 [tool.coverage.run]
 omit = [
-    "tests/*",
-    "*/tests/*",
+  "tests/*",
+  "*/tests/*"
 ]
 
 [tool.coverage.report]
 exclude_also = [
-    "if TYPE_CHECKING:",
+  "if TYPE_CHECKING:"
 ]
 
 [tool.tomlsort]
