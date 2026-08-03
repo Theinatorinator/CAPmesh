@@ -199,7 +199,7 @@ task test
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the AGPLv3 or later license - see the [LICENSE](LICENSES/AGPL-3.0-or-later.txt) file for details.
 
 ## 🔗 Links
 
