@@ -28,7 +28,9 @@ dependencies = [
   "tenacity>=9.1.4",
   "httpx>=0.28.1",
   "python-dateutil>=2.9.0.post0",
-  "sqlmodel>=0.0.39"
+  "sqlmodel>=0.0.39",
+  "blinker>=1.9.0",
+  "rule-engine>=5.0.2"
 ]
 
 [project.urls]
