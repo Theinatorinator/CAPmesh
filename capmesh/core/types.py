@@ -4,6 +4,7 @@
 
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
 from typing import List, Optional, Protocol, TypeAlias
 
 import paho.mqtt.client as mqtt
@@ -96,3 +97,18 @@ class AlertCache(Protocol):
   def purge_expired(self) -> None:
     """Scan the storage layer and prune expired entries from the cache."""
     ...
+
+
+@dataclass
+class AlertFeed:
+  class Meta:
+    name = "alerts"
+    namespace = "http://gov.fema.ipaws.services/feed"
+
+  alert: List[Alert] = field(
+    default_factory=list,
+    metadata={
+      "type": "Element",
+      "namespace": "urn:oasis:names:tc:emergency:cap:1.2",
+    },
+  )
