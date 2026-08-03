@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Logan Mamanakis Logan.Mamanakis@gmail.com>
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -7,10 +11,12 @@ name = "CAPmesh"
 version = "0.1.0"
 description = "Collects CAP based messages from various sources, prepares them, and disseminates them to Mesh networks or other local networks."
 authors = [
-    { name = "theinatorinator", email = "98051141+Theinatorinator@users.noreply.github.com" }
+    { name = "Logan Mamanakis", email = "Logan.Mamanakis@gmail.com" }
 ]
 readme = "README.md"
 requires-python = ">=3.13"
+license = "AGPL-3.0-or-later"
+license-files = [ "LICENSE" ]
 dependencies = [
   "pydantic>=2.10.6",
   "pydantic-settings>=2.6.1",

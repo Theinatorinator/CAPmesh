@@ -1,0 +1,21 @@
+version = 1
+
+SPDX-PackageName = "CAPmesh"
+SPDX-PackageSupplier = "Logan Mamanakis <Logan.Mamanakis@gmail.com>"
+SPDX-PackageDownloadLocation = "https://github.com/theinatorinator/CAPmesh"
+
+# External annotations strictly for files that don't support comment headers
+[[annotations]]
+path = [
+    ".copier-answers.yml",
+    ".env_template",
+    ".github/**/*.md",
+    ".gitignore",
+    ".pre-commit-config.yaml",
+    ".ruff.toml",
+    ".vscode/**/*.json",
+    "Taskfile.yml",
+    "uv.lock"
+]
+SPDX-FileCopyrightText = "2026 Logan Mamanakis <Logan.Mamanakis@gmail.com>"
+SPDX-License-Identifier = "AGPL-3.0-or-later"

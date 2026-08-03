@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Logan Mamanakis Logan.Mamanakis@gmail.com>
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 from click.testing import CliRunner
 
 from capmesh.cli.__main__ import cli
