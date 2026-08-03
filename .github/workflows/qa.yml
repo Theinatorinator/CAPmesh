@@ -10,6 +10,8 @@ jobs:
   qa:
     name: Code QA
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 20
 
     steps:
@@ -25,7 +27,8 @@ jobs:
         uses: go-task/setup-task@v2.1.0
 
       - name: Prepare UV environment
-        run: uv sync --all-groups --all-extras
+        run: uv sync --all-groups --all-extras --frozen
+
 
       - name: QA task
         run: task qa
