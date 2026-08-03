@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2026 Logan Mamanakis Logan.Mamanakis@gmail.com>
+# SPDX-FileCopyrightText: 2026 Logan Mamanakis <Logan.Mamanakis@gmail.com>
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -52,4 +52,4 @@ tasks:
   test:
     desc: "Run tests with coverage"
     cmds:
-      - pytest -vv --cov --cov-report=html:tests/coverage --cov-fail-under=95 {{if .CLI_ARGS}}{{.CLI_ARGS}}{{else}}.{{end}}
+      - "{{.VENV}}/pytest -vv --cov --cov-report=html:tests/coverage --cov-fail-under=95 {{if .CLI_ARGS}}{{.CLI_ARGS}}{{else}}.{{end}}"
