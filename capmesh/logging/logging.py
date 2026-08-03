@@ -11,40 +11,37 @@ def setup_logger(
   *, app_name: str, log_level: str, bind_to: Optional[logging.Logger] = None
 ) -> logging.Logger:
   """
-  Set up a logger with the specified application name and log level.
+  Set up logging by configuring the root logger level and stdout handler.
 
-  Parameters
-  ----------
-  app_name : str
-      The name of the application.
-  log_level : str
-      The logging level as a string (e.g., 'DEBUG', 'INFO', 'WARNING',
-      'ERROR', 'CRITICAL').
-  bind_to : Optional[logging.Logger], optional
-      An existing logger to bind the new logger's handlers to, by
-      default None. Typically used for fastapi applications.
-      ```python
-      from fastapi.logger import logger as fastapi_logger
-
-      setup_logger(app_name="my_app", log_level="info", bind_to=fastapi_logger)
-      ```
-
-  Returns
-  -------
-  logging.Logger
-      The configured logger instance.
+  All child loggers automatically inherit the root level and propagate logs to root.
   """
+  level = getattr(logging, log_level.upper(), None)
+  if not isinstance(level, int):
+    level = logging.INFO
+
+  # 1. Root logger holds the level AND the stdout handler
+  root_logger = logging.getLogger()
+  root_logger.setLevel(level)
+
+  # Attach StreamHandler to stdout if not already attached
+  has_stdout_handler = any(
+    isinstance(h, logging.StreamHandler) and h.stream == sys.stdout
+    for h in root_logger.handlers
+  )
+
+  if not has_stdout_handler:
+    console_handler = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter(
+      "%(asctime)s [%(levelname)8.8s] %(name)s (%(filename)s:%(lineno)d): %(message)s"
+    )
+    console_handler.setFormatter(formatter)
+    root_logger.addHandler(console_handler)
+
+  # 2. Get application logger (level defaults to NOTSET, inheriting root's effective level)
   logger = logging.getLogger(app_name)
-  normalised_log_level = getattr(logging, log_level.upper()) or logging.INFO
-  logger.setLevel(normalised_log_level)
 
-  console_handler = logging.StreamHandler(sys.stdout)
-  formatter = logging.Formatter("%(asctime)s [%(levelname)8.8s] %(message)s")
-  console_handler.setFormatter(formatter)
-  logger.addHandler(console_handler)
-
-  if bind_to:
-    bind_to.handlers = logger.handlers
-    bind_to.setLevel(log_level)
+  # 3. If binding an external logger, set level to NOTSET so it inherits root level
+  if bind_to is not None:
+    bind_to.setLevel(logging.NOTSET)
 
   return logger
