@@ -24,7 +24,7 @@ def test_simple_command_exception_handling(
   with patch("capmesh.cli.simple_command.click.echo") as mock_echo:
     mock_echo.side_effect = Exception("Mocked exception")
 
-    result = cli_runner.invoke(cli, ["simple-command", "test_arg"], obj=None)
+    result = cli_runner.invoke(cli, ["simple-command", "test"], obj=None)
 
     # The command should exit with code 1 due to the exception
     assert result.exit_code == 1

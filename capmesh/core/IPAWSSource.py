@@ -43,6 +43,14 @@ class IPAWSSource:
     self.database: AlertCache = database
     self.database.initialize()
 
+    # Use explicit, bounded timeouts so polling does not hang indefinitely
+    timeout = httpx.Timeout(
+      connect=5.0,  # DNS + TCP connect
+      read=10.0,  # response reading
+      write=5.0,  # request upload
+      pool=5.0,  # connection pool acquisition
+    )
+
     user_agent = (
       f"CapMesh/{__version__} "
       f"(+https://github.com/Theinatorinator/CAPmesh; logan.mamanakis@gmail.com) "
@@ -54,11 +62,13 @@ class IPAWSSource:
       f"IPAWS client for URL: {str(self.feed_url)} has user agent: {user_agent}"
     )
 
-    self.client = httpx.Client(headers={"User-Agent": user_agent})
+    self.client = httpx.Client(
+      headers={"User-Agent": user_agent}, timeout=timeout
+    )
 
   # 1. Configure Tenacity to retry on HTTP errors and connection dropouts
   @retry(
-    stop=stop_after_attempt(3),  # Stop trying after 5 failures
+    stop=stop_after_attempt(3),  # Stop trying after 3 failures
     wait=wait_exponential(
       multiplier=1, min=2, max=16
     ),  # Wait 2s, 4s, 8s, 16s...
@@ -98,9 +108,8 @@ class IPAWSSource:
       payload: str = self.fetch()
       messages: list[Alert] = self.parse(payload)
 
-      if hasattr(self.database, "save_cap_"):
-        for message in messages:
-          self.database.save_cap_message(data=message)
+      for message in messages:
+        self.database.save_cap_message(data=message)
 
       self.cap_received.send(messages)
     except Exception as e:

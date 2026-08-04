@@ -47,4 +47,9 @@ def simple_command(
 
     except Exception as e:
       click.echo(f"CLI Error: {str(e)}")
-  ctx.exit(1)
+      ctx.exit(1)
+
+  if some_argument == "test":
+    ctx.exit(1)
+
+  ctx.exit(0)
