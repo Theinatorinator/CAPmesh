@@ -8,6 +8,7 @@ from typing import Optional
 
 import click
 from cap_tools.models import Alert
+from httpx import URL
 
 from capmesh.app_context import AppContext
 from capmesh.core import IPAWSDatabase, IPAWSSource
@@ -34,8 +35,11 @@ def simple_command(
       app_context: AppContext = ctx.obj
       app_context.logger.info("Context Online")
 
+      urls: URL = URL(
+        "https://tdl.apps.fema.gov/IPAWSOPEN_EAS_SERVICE/rest/public/recent/2024-02-15T12:00:00Z"
+      )
       source: IPAWSSource = IPAWSSource(
-        "https://tdl.apps.fema.gov/IPAWSOPEN_EAS_SERVICE/rest/public/recent/2024-02-15T12:00:00Z",
+        urls,
         IPAWSDatabase(),
       )
       mydata: list[Alert] = source.parse(source.fetch())
