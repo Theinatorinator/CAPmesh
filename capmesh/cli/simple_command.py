@@ -2,12 +2,16 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
+
 from datetime import datetime
 from typing import Optional
 
 import click
+from cap_tools.models import Alert
+from httpx import URL
 
 from capmesh.app_context import AppContext
+from capmesh.core import IPAWSDatabase, IPAWSSource
 
 
 @click.command(name="simple-command")
@@ -26,11 +30,26 @@ def simple_command(
   """
   This is a simple command.
   """
-  try:
-    app_context: AppContext = ctx.obj
-    click.echo(
-      f"simple-command: {app_context.app_config.app_name} {some_option} {some_argument}"
-    )
-  except Exception as e:
-    click.echo(f"CLI Error: {str(e)}")
+  if some_argument == "sendit":
+    try:
+      app_context: AppContext = ctx.obj
+      app_context.logger.info("Context Online")
+
+      urls: URL = URL(
+        "https://tdl.apps.fema.gov/IPAWSOPEN_EAS_SERVICE/rest/public/recent/2024-02-15T12:00:00Z"
+      )
+      source: IPAWSSource = IPAWSSource(
+        urls,
+        IPAWSDatabase(),
+      )
+      mydata: list[Alert] = source.parse(source.fetch())
+      app_context.logger.debug(f"Length of alert list{(len(mydata))}")
+
+    except Exception as e:
+      click.echo(f"CLI Error: {str(e)}")
+      ctx.exit(1)
+
+  if some_argument == "test":
     ctx.exit(1)
+
+  ctx.exit(0)
