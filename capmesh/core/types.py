@@ -5,7 +5,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import List, Optional, Protocol, TypeAlias
+from typing import List, Protocol, TypeAlias
 
 import paho.mqtt.client as mqtt
 from cap_tools.models import Alert
@@ -79,11 +79,13 @@ class AlertCache(Protocol):
     """Create required tables, schemas, and indexes for the cache."""
     ...
 
+  @abstractmethod
   def save_cap_message(self, data: Alert) -> None:
     """Persist a CAP message instance into the database cache store."""
     ...
 
-  def get_cap_message(self, message_id: str) -> Optional[Alert]:
+  @abstractmethod
+  def get_cap_message(self, message_id: str) -> Alert | None:
     """Retrieve a cached CAP message object by its unique identifier string.
 
     Returns None if no matching record is found in the cache.
