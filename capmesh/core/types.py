@@ -119,6 +119,13 @@ class AlertFeed:
 
 
 class AlertSource(typing.ContextManager["AlertSource"], ABC):
+  """Source lifecycle contract for managed alert collection.
+
+  ``__enter__`` should acquire or start source resources and return the source
+  instance. ``__exit__`` should release those resources; returning ``None``
+  preserves any exception raised inside the context.
+  """
+
   cap_received: Signal
 
   @abstractmethod
