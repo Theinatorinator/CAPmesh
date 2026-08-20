@@ -17,8 +17,10 @@ CAPmesh --help
 import click
 from rich.console import Console
 
+from capmesh import __version__
 from capmesh.app_context import AppContext
 from capmesh.cli.simple_command import simple_command
+from capmesh.cli.source import source
 from capmesh.cli.subcommand import subcommand
 
 CONTEXT_SETTINGS = dict(
@@ -29,7 +31,7 @@ CONTEXT_SETTINGS = dict(
 console = Console()
 
 
-@click.version_option(None, "--version", "-v")
+@click.version_option(__version__, "--version", "-v")
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 def cli(ctx: click.Context) -> None:
@@ -41,9 +43,9 @@ def cli(ctx: click.Context) -> None:
   ctx.ensure_object(AppContext)
 
 
-cli.add_command(subcommand)
-cli.add_command(simple_command)
-
+cli.add_command(cmd=subcommand)
+cli.add_command(cmd=simple_command)
+cli.add_command(cmd=source)
 
 if __name__ == "__main__":
   cli()

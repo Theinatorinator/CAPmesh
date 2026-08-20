@@ -3,11 +3,13 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 
+import typing
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import List, Protocol, TypeAlias
 
 import paho.mqtt.client as mqtt
+from blinker import Signal
 from cap_tools.models import Alert
 from rule_engine import Rule
 
@@ -114,3 +116,26 @@ class AlertFeed:
       "namespace": "urn:oasis:names:tc:emergency:cap:1.2",
     },
   )
+
+
+class AlertSource(typing.ContextManager["AlertSource"], ABC):
+  """Source lifecycle contract for managed alert collection.
+
+  ``__enter__`` should acquire or start source resources and return the source
+  instance. ``__exit__`` should release those resources; returning ``None``
+  preserves any exception raised inside the context.
+  """
+
+  cap_received: Signal
+
+  @abstractmethod
+  def run(self) -> None: ...
+
+
+class PollingAlertSource(AlertSource):
+  @abstractmethod
+  def fetch(self) -> str: ...
+  @abstractmethod
+  def parse(self, payload: str) -> list[Alert]: ...
+  @abstractmethod
+  def poll(self) -> None: ...
