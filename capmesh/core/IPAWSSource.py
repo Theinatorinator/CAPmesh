@@ -12,6 +12,7 @@
 import io
 import logging
 import platform
+from types import TracebackType
 
 import httpx
 from blinker import Signal
@@ -28,43 +29,44 @@ from xsdata.formats.dataclass.context import XmlContext
 from xsdata.formats.dataclass.parsers import XmlParser
 
 from capmesh import __app_name__, __version__
-from capmesh.core.types import AlertCache, AlertFeed
+from capmesh.core.types import AlertFeed, PollingAlertSource
 
 logger = logging.getLogger(name=__app_name__)
 
 
-class IPAWSSource:
+# Maybe one day we'll make this a proper singleton
+class IPAWSSource(PollingAlertSource):
   """Fetches and caches CAP data from the IPAWS feed."""
 
-  cap_received = Signal("cap_received")
-
-  def __init__(self, feed_url: URL, database: AlertCache) -> None:
+  def __init__(self, feed_url: URL, fresh_data: Signal) -> None:
     self.feed_url: URL = feed_url
-    self.database: AlertCache = database
-    self.database.initialize()
+    self.cap_received = fresh_data
 
     # Use explicit, bounded timeouts so polling does not hang indefinitely
-    timeout = httpx.Timeout(
+    self.timeout = httpx.Timeout(
       connect=5.0,  # DNS + TCP connect
       read=10.0,  # response reading
       write=5.0,  # request upload
       pool=5.0,  # connection pool acquisition
     )
 
-    user_agent = (
+    self.user_agent = (
       f"CapMesh/{__version__} "
       f"(+https://github.com/Theinatorinator/CAPmesh; logan.mamanakis@gmail.com) "
       f"httpx/{httpx.__version__} "
       f"Python/{platform.python_version()}"
     )
-    logger.info(f"Starting IPAWS client for URL: {self.feed_url}")
-    logger.debug(
-      f"IPAWS client for URL: {str(self.feed_url)} has user agent: {user_agent}"
+    self.client = httpx.Client(
+      headers={"User-Agent": self.user_agent}, timeout=self.timeout
     )
 
-    self.client = httpx.Client(
-      headers={"User-Agent": user_agent}, timeout=timeout
+  def __enter__(self) -> PollingAlertSource:
+    logger.info(f"Starting IPAWS client for URL: {self.feed_url}")
+    logger.debug(
+      f"IPAWS client for URL: {str(self.feed_url)} has user agent: {self.user_agent}"
     )
+    self.client.__enter__()
+    return self
 
   # 1. Configure Tenacity to retry on HTTP errors and connection dropouts
   @retry(
@@ -103,21 +105,34 @@ class IPAWSSource:
     return alerts
 
   def poll(self) -> None:
-    """Fetch and cache the latest messages from the feed."""
+    """Fetch and announce the latest messages from the feed."""
     try:
       payload: str = self.fetch()
       messages: list[Alert] = self.parse(payload)
 
       for message in messages:
-        self.database.save_cap_message(data=message)
+        # It might be cool to just send self as the sender, and could be very useful
+        # But thats a whole lotta data to throw around without any real good purpose
+        # So we will add that change if needed
+        self.cap_received.send(
+          self.__class__.__name__ + "---" + str(self.__hash__()),
+          message=message,
+        )
 
-      self.cap_received.send(messages)
     except Exception as e:
       # 3. Catch final failure here so your master loop doesn't crash
       logger.critical(
         f"IPAWS Polling cycle completely failed after all retries: {e}"
       )
 
-  def close(self) -> None:
+  def run(self) -> None:
+    self.poll()
+
+  def __exit__(
+    self,
+    exc_type: type[BaseException] | None = None,
+    exc_val: BaseException | None = None,
+    exc_tb: TracebackType | None = None,
+  ) -> None:
     """Close the underlying HTTP client connection pool."""
-    self.client.close()
+    self.client.__exit__(exc_type, exc_val, exc_tb)

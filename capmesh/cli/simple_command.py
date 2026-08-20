@@ -7,11 +7,12 @@ from datetime import datetime
 from typing import Optional
 
 import click
+from blinker import Signal
 from cap_tools.models import Alert
 from httpx import URL
 
 from capmesh.app_context import AppContext
-from capmesh.core import IPAWSDatabase, IPAWSSource
+from capmesh.core import IPAWSSource
 
 
 @click.command(name="simple-command")
@@ -38,12 +39,9 @@ def simple_command(
       urls: URL = URL(
         "https://tdl.apps.fema.gov/IPAWSOPEN_EAS_SERVICE/rest/public/recent/2024-02-15T12:00:00Z"
       )
-      source: IPAWSSource = IPAWSSource(
-        urls,
-        IPAWSDatabase(),
-      )
-      mydata: list[Alert] = source.parse(source.fetch())
-      app_context.logger.debug(f"Length of alert list{(len(mydata))}")
+      with IPAWSSource(urls, Signal()) as source:
+        mydata: list[Alert] = source.parse(source.fetch())
+        app_context.logger.debug(f"Length of alert list{(len(mydata))}")
 
     except Exception as e:
       click.echo(f"CLI Error: {str(e)}")
