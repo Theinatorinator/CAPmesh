@@ -19,7 +19,9 @@ def source_factory(
   source_type: str, uri: str, fresh_data: Signal
 ) -> AlertSource:
   """Pythonic factory function that resolves and instantiates source classes."""
-  source_class: type | None = SOURCE_REGISTRY.get(source_type.lower())
+  source_class: type[AlertSource] | None = SOURCE_REGISTRY.get(
+    source_type.lower()
+  )
 
   if not source_class:
     # Click-native exception will cleanly report back to the user
@@ -49,7 +51,7 @@ def source(ctx: click.Context, type: str) -> None:
 @click.argument("uri", type=str, required=True)
 @click.option("--output", default="stdout")
 @click.pass_context
-def fetch(ctx: click.Context, output: Optional[str], uri: str) -> None:
+def fetch(ctx: click.Context, uri: str, output: Optional[str]) -> None:
   # Somehow we need to be able to declare how to deal with various sources
   # Example, one might handle com ports, one polling, another one another etc.
   # Noting that for future development

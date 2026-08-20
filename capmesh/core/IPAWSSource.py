@@ -115,7 +115,7 @@ class IPAWSSource(PollingAlertSource):
         # But thats a whole lotta data to throw around without any real good purpose
         # So we will add that change if needed
         self.cap_received.send(
-          self.__class__.__name__ + "---" + str(self.__hash__()),
+          self.__class__.__name__ + "---" + str(id(self)),
           message=message,
         )
 
