@@ -30,7 +30,10 @@ dependencies = [
   "python-dateutil>=2.9.0.post0",
   "sqlmodel>=0.0.39",
   "blinker>=1.9.0",
-  "rule-engine>=5.0.2"
+  "rule-engine>=5.0.2",
+  "lxml>=6.1.2",
+  "signxml>=5.1.0",
+  "cryptography>=50.0.0"
 ]
 
 [project.urls]
@@ -60,7 +63,8 @@ dev = [
   "pytest-xdist>=3.6,<4",
   "ruff>=0.16.3,<0.17",
   "toml-sort>=0.24.2,<0.25",
-  "safety>=3.2.9,<4"
+  "safety>=3.2.9,<4",
+  "lxml-stubs>=0.5.1"
 ]
 
 [tool.uv]
