@@ -40,9 +40,6 @@ import threading
 import typing
 from pathlib import Path
 
-# Since CAP_1_2_NAMESPACE is defined at the package root level,
-# we can safely import just this constant from the package,
-# or redefine it locally if mypy still complains about the package root.
 from .CAPSchemaStep import CAPSchemaStep
 from .types import (
   TrustedCertSource,
