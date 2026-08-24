@@ -19,7 +19,6 @@ from .ErrorTypes import (
   CAPValidationError,
 )
 from .RevocationStep import RevocationStep
-from .TrustChainStep import TrustChainStep
 from .types import (
   PipelineState,
   TrustedCertSource,
@@ -50,7 +49,6 @@ __all__ = [
   "PipelineState",
   "CAPSchemaStep",
   "CryptoSignatureStep",
-  "TrustChainStep",
   "RevocationStep",
   "CAPCryptoValidator",
   "TrustedCertSource",

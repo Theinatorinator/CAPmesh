@@ -37,28 +37,14 @@ from __future__ import annotations
 
 import logging
 import threading
-import time
 import typing
 from pathlib import Path
-
-from cryptography.hazmat.primitives import hashes
-from lxml import etree
 
 # Since CAP_1_2_NAMESPACE is defined at the package root level,
 # we can safely import just this constant from the package,
 # or redefine it locally if mypy still complains about the package root.
-from . import CAP_1_2_NAMESPACE
 from .CAPSchemaStep import CAPSchemaStep
-from .CryptoSignatureStep import CryptoSignatureStep
-from .ErrorTypes import (
-  CAPInternalError,
-  CAPSchemaError,
-  CAPValidationError,
-)
-from .RevocationStep import RevocationStep
-from .TrustChainStep import TrustChainStep
 from .types import (
-  PipelineState,
   TrustedCertSource,
   ValidationContext,
   ValidationResult,
@@ -135,9 +121,6 @@ class CAPCryptoValidator:
     )
     steps: list[ValidationStep] = [
       CAPSchemaStep(xsd_path=xsd_path),
-      CryptoSignatureStep(),
-      TrustChainStep(),
-      RevocationStep(),
     ]
     return cls(context, steps)
 
@@ -155,97 +138,18 @@ class CAPCryptoValidator:
       use_system_truststore=True,
       require_ocsp_crl=False,
     )
-    steps: list[ValidationStep] = [CryptoSignatureStep(), TrustChainStep()]
+    steps: list[ValidationStep] = []
     return cls(context, steps)
 
   # -- main entry point ------------------------------------------------
 
-  def verify(self, xml_bytes: bytes) -> ValidationResult:
+  def verify(self, xml_bytes: bytes) -> ValidationResult | None:
     """Run the full pipeline against ``xml_bytes`` and return a
     :class:`ValidationResult`. Never raises for validation failures;
     only re-raises ``KeyboardInterrupt``/``SystemExit``/``MemoryError``
     so a worker thread pool isn't silently killed by those.
     """
-    start = time.monotonic()
-    step_timings: dict[str, float] = {}
-    errors: list[CAPValidationError] = []
-    parsed_alert: dict[str, typing.Any] | None = None
-    state = PipelineState()
-
-    try:
-      parser = etree.XMLParser(
-        resolve_entities=False, no_network=True, huge_tree=False
-      )
-      xml_element = etree.fromstring(xml_bytes, parser=parser)
-    except etree.XMLSyntaxError as exc:
-      error = CAPSchemaError(f"Document is not well-formed XML: {exc}")
-      errors.append(error)
-      result = ValidationResult(
-        is_valid=False,
-        errors=errors,
-        parsed_alert=None,
-        metrics={
-          "step_timings": step_timings,
-          "total_seconds": time.monotonic() - start,
-        },
-      )
-      self._fire(self.on_validation_failed, errors, None, self._context)
-      return result
-
-    for step in self._steps:
-      step_start = time.monotonic()
-      try:
-        step(xml_element, self._context, state=state)
-
-      except CAPValidationError as exc:
-        errors.append(exc)
-        step_timings[type(step).__name__] = time.monotonic() - step_start
-        break
-      except (KeyboardInterrupt, SystemExit, MemoryError):
-        raise
-      except Exception as exc:  # noqa: BLE001 - deliberate broad catch, see class docstring
-        logger.exception(
-          "Unexpected error in validation step %s", type(step).__name__
-        )
-        errors.append(
-          CAPInternalError(
-            f"{type(step).__name__} raised an unexpected error: {exc}"
-          )
-        )
-        step_timings[type(step).__name__] = time.monotonic() - step_start
-        break
-      else:
-        step_timings[type(step).__name__] = time.monotonic() - step_start
-        self._fire(self.on_step_complete, step, xml_element, self._context)
-
-    if not errors:
-      parsed_alert = _extract_alert_summary(xml_element)
-
-    metrics: dict[str, typing.Any] = {
-      "step_timings": step_timings,
-      "total_seconds": time.monotonic() - start,
-    }
-    if state.signer_certificate is not None:
-      metrics["signer_fingerprint_sha256"] = (
-        state.signer_certificate.fingerprint(hashes.SHA256()).hex()
-      )
-      metrics["signer_subject"] = (
-        state.signer_certificate.subject.rfc4514_string()
-      )
-
-    result = ValidationResult(
-      is_valid=not errors,
-      errors=errors,
-      parsed_alert=parsed_alert,
-      metrics=metrics,
-    )
-
-    if errors:
-      self._fire(self.on_validation_failed, errors, xml_element, self._context)
-    else:
-      self._fire(self.on_validation_success, result, xml_element, self._context)
-
-    return result
+    return None
 
   # -- internals ------------------------------------------------------
 
@@ -257,22 +161,3 @@ class CAPCryptoValidator:
         callback(*args)
       except Exception:  # noqa: BLE001
         logger.exception("Observer callback %r raised", callback)
-
-
-def _extract_alert_summary(
-  xml_element: etree._Element,
-) -> dict[str, typing.Any]:
-  ns = {"cap": CAP_1_2_NAMESPACE}
-
-  def text_of(tag: str) -> str | None:
-    node = xml_element.find(f"cap:{tag}", namespaces=ns)
-    return node.text if node is not None else None
-
-  return {
-    "identifier": text_of("identifier"),
-    "sender": text_of("sender"),
-    "sent": text_of("sent"),
-    "status": text_of("status"),
-    "msgType": text_of("msgType"),
-    "scope": text_of("scope"),
-  }
