@@ -62,7 +62,8 @@ dev = [
   "ruff>=0.16.3,<0.17",
   "toml-sort>=0.24.2,<0.25",
   "safety>=3.2.9,<4",
-  "types-lxml>=2026.2.16"
+  "types-lxml>=2026.2.16",
+  "ipython>=9.16.1"
 ]
 
 [tool.uv]
