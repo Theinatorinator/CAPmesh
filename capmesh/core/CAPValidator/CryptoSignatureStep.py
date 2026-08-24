@@ -10,16 +10,11 @@ from signxml.exceptions import (
   InvalidInput,
   InvalidSignature,
 )
-from signxml.util import namespaces
 from signxml.verifier import SignatureConfiguration, VerifyResult
 
 from .types import PipelineState, ValidationContext, ValidationStep
 
-logger = logging.getLogger(__name__)
-
-# CRITICAL: Register FEMA/IPAWS custom signature namespace prefix globally
-# Without this, XPath evaluation during canonicalization drops the signature nodes
-etree.register_namespace("capSig", namespaces.ds)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 class CryptoSignatureStep(ValidationStep):
@@ -39,7 +34,7 @@ class CryptoSignatureStep(ValidationStep):
   ) -> None:
     """
     Args:
-        trusted_ca_pem: The PEM-encoded trusted Root/Intermediate CA bundle.
+        trusted_ca_pem: The trusted Root/Intermediate CA bundle.
                         If None, relies on the OS trust store.
     """
     self._trusted_ca_pem: Final[x509.Certificate] = trusted_ca_pem
