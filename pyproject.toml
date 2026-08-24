@@ -62,7 +62,7 @@ dev = [
   "ruff>=0.16.3,<0.17",
   "toml-sort>=0.24.2,<0.25",
   "safety>=3.2.9,<4",
-  "lxml-stubs>=0.5.1"
+  "types-lxml>=2026.2.16"
 ]
 
 [tool.uv]
@@ -89,6 +89,7 @@ show_column_numbers = true
 show_error_codes = true
 show_error_context = true
 warn_unreachable = true
+plugins = ["mypy_plugin_lxml.main"]
 
 [tool.pytest.ini_options] # https://docs.pytest.org/en/latest/reference/reference.html#ini-options-ref
 pythonpath = [".", "capmesh"]
