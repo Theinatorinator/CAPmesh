@@ -10,6 +10,8 @@ from lxml.etree import XMLSchema, _ElementTree
 from lxml.etree._element import _Element
 from lxml.etree._xmlerror import _ListErrorLog, _LogEntry
 
+from capmesh.core.CAPValidator import PipelineState
+
 from .ErrorTypes import CAPSchemaError
 from .types import ValidationContext, ValidationStep
 
@@ -57,10 +59,12 @@ class CAPSchemaStep(ValidationStep):
     self,
     xml_element: etree._Element,
     context: ValidationContext,
+    state: PipelineState | None,
     **_kwargs: Any,
-  ) -> None:
+  ) -> PipelineState:
     """Validates a CAP XML element against the schema and logs the outcome."""
-
+    if state is None:
+      state = PipelineState()
     alert_id: str = xml_element.findtext(path="identifier", default="UNKNOWN")
     sender: str = xml_element.findtext(path="sender", default="UNKNOWN")
 
@@ -78,6 +82,7 @@ class CAPSchemaStep(ValidationStep):
     logger.debug(
       msg=f"Successfully validated CAP alert {alert_id:s} from sender {sender:s}"
     )
+    return state
 
   def _log_schema_validation_errors(
     self, alert_id: str, sender: str, error_log: _ListErrorLog

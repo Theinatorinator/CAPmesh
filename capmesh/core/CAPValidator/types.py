@@ -1,13 +1,15 @@
 import logging
 import typing
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime as dt
 from datetime import timezone as tz
 from pathlib import Path
-from typing import runtime_checkable
+from typing import Any
 
 from cryptography import x509
 from lxml import etree
+from signxml.verifier import VerifyResult
 
 from . import (
   CAPTrustChainError,
@@ -121,8 +123,20 @@ class ValidationResult:
   metrics: dict[str, typing.Any]
 
 
-@runtime_checkable
-class ValidationStep(typing.Protocol):
+@dataclass
+class PipelineState:
+  """Mutable scratch space threaded through one ``verify()`` call so
+  steps can hand results to later steps (e.g. the certificate extracted
+  by signature verification is needed by trust-chain and revocation
+  checks). This object is created fresh per call and never shared across
+  threads or across calls.
+  """
+
+  signed_xml: typing.Any = None
+  verification_result: VerifyResult | None = None
+
+
+class ValidationStep(ABC):
   """A single stage in the validation pipeline.
 
   Implementations must be safe to call concurrently from multiple threads
@@ -130,12 +144,14 @@ class ValidationStep(typing.Protocol):
   not mutate shared instance state during ``__call__``.
   """
 
+  @abstractmethod
   def __call__(
     self,
     xml_element: etree._Element,
     context: ValidationContext,
-    **kwargs: typing.Any,
-  ) -> None:
+    state: PipelineState | None,
+    **_kwargs: Any,
+  ) -> PipelineState:
     """Validate one aspect of ``xml_element``.
 
     Implementations communicate cross-step results (e.g. the extracted
@@ -152,16 +168,3 @@ class ValidationStep(typing.Protocol):
             should raise the most specific exception type available.
     """
     ...
-
-
-@dataclass
-class PipelineState:
-  """Mutable scratch space threaded through one ``verify()`` call so
-  steps can hand results to later steps (e.g. the certificate extracted
-  by signature verification is needed by trust-chain and revocation
-  checks). This object is created fresh per call and never shared across
-  threads or across calls.
-  """
-
-  signer_certificate: x509.Certificate | None = None
-  signed_xml: typing.Any = None

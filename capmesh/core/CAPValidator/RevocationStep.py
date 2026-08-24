@@ -91,16 +91,19 @@ class RevocationStep(ValidationStep):
     context: ValidationContext,
     state: PipelineState | None = None,
     **_kwargs: Any,
-  ) -> None:
+  ) -> PipelineState:
     if state is None:
       state = PipelineState()
-    if state.signer_certificate is None:
+
+    if state.verification_result is None:
       raise CAPRevocationError(
         "RevocationStep ran without a signer certificate; "
         "CryptoSignatureStep must run first"
       )
 
-    cert = state.signer_certificate
+    cert = x509.load_pem_x509_certificate(
+      state.verification_result.signature_key
+    )
     issuer = self._resolve_issuer(cert, context)
 
     status, detail = self._check_ocsp(cert, issuer, context)
@@ -123,6 +126,7 @@ class RevocationStep(ValidationStep):
         cert.serial_number,
         detail,
       )
+    return state
 
   # -- issuer resolution -------------------------------------------------
 
