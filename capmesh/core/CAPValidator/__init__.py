@@ -2,9 +2,10 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 import logging
-from datetime import timedelta
+from typing import Final
 
-from cryptography.hazmat.primitives.hashes import SHA256, SHA384, SHA512
+from lxml import etree
+from signxml.util import namespaces
 
 from .CAPCryptoValidator import CAPCryptoValidator
 from .CAPSchemaStep import CAPSchemaStep
@@ -25,15 +26,16 @@ from .types import (
   ValidationStep,
 )
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(name=__name__)
 
-CAP_1_2_NAMESPACE = "urn:oasis:names:tc:emergency:cap:1.2"
-DS_NAMESPACE = "http://www.w3.org/2000/09/xmldsig#"
-_MAX_RESPONSE_AGE = timedelta(days=7)
-_CLOCK_SKEW = timedelta(minutes=5)
-_ALLOWED_HASH_ALGORITHMS = (SHA256, SHA384, SHA512)
+CAP_1_2_NAMESPACE: Final[str] = "urn:oasis:names:tc:emergency:cap:1.2"
 
-__all__ = [
+
+logger.debug(msg=f"registering prefix capSig as namespace{namespaces.ds:s}")
+etree.register_namespace(prefix="capSig", uri=namespaces.ds)
+
+
+__all__: list[str] = [
   "CAPSignatureSyntaxError",
   "CAPSignatureMathError",
   "CAPTrustChainError",
