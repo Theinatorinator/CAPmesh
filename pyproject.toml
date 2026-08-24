@@ -10,9 +10,7 @@ build-backend = "hatchling.build"
 name = "CAPmesh"
 version = "0.1.0"
 description = "Collects CAP based messages from various sources, prepares them, and disseminates them to Mesh networks or other local networks."
-authors = [
-  {name = "Logan Mamanakis", email = "Logan.Mamanakis@gmail.com"}
-]
+authors = [{name = "Logan Mamanakis", email = "Logan.Mamanakis@gmail.com"}]
 readme = "README.md"
 requires-python = ">=3.13"
 license = "AGPL-3.0-or-later"
@@ -70,6 +68,9 @@ dev = [
 [tool.uv]
 required-version = ">=0.8.4"
 
+[tool.hatch.build.targets.wheel]
+include = ["capmesh/core/CAPValidator/schemas/*.xsd"]
+
 [tool.commitizen] # https://commitizen-tools.github.io/commitizen/config/
 bump_message = "bump(release): v$current_version → v$new_version"
 tag_format = "v$version"
@@ -90,13 +91,8 @@ show_error_context = true
 warn_unreachable = true
 
 [tool.pytest.ini_options] # https://docs.pytest.org/en/latest/reference/reference.html#ini-options-ref
-pythonpath = [
-  ".",
-  "capmesh"
-]
-testpaths = [
-  "tests"
-]
+pythonpath = [".", "capmesh"]
+testpaths = ["tests"]
 addopts = [
   "--cov=capmesh/",
   "--cov-report=term",
@@ -110,15 +106,10 @@ addopts = [
 ENVIRONMENT = "test"
 
 [tool.coverage.run]
-omit = [
-  "tests/*",
-  "*/tests/*"
-]
+omit = ["tests/*", "*/tests/*"]
 
 [tool.coverage.report]
-exclude_also = [
-  "if TYPE_CHECKING:"
-]
+exclude_also = ["if TYPE_CHECKING:"]
 
 [tool.tomlsort]
 all = false
