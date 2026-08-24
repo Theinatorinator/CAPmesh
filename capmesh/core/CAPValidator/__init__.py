@@ -9,7 +9,8 @@ from cryptography.hazmat.primitives.hashes import SHA256, SHA384, SHA512
 from .CAPCryptoValidator import CAPCryptoValidator
 from .CAPSchemaStep import CAPSchemaStep
 from .CryptoSignatureStep import CryptoSignatureStep
-from .ErrorTypes import (
+from .RevocationStep import RevocationStep
+from .types import (
   CAPInternalError,
   CAPRevocationError,
   CAPSchemaError,
@@ -17,9 +18,6 @@ from .ErrorTypes import (
   CAPSignatureSyntaxError,
   CAPTrustChainError,
   CAPValidationError,
-)
-from .RevocationStep import RevocationStep
-from .types import (
   PipelineState,
   TrustedCertSource,
   ValidationContext,

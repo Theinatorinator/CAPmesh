@@ -12,8 +12,7 @@ from lxml.etree._xmlerror import _ListErrorLog, _LogEntry
 
 from capmesh.core.CAPValidator import PipelineState
 
-from .ErrorTypes import CAPSchemaError
-from .types import ValidationContext, ValidationStep
+from .types import CAPSchemaError, ValidationContext, ValidationStep
 
 logger: logging.Logger = logging.getLogger(name=__name__)
 

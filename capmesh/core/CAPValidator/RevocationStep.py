@@ -36,8 +36,8 @@ from . import (
   _CLOCK_SKEW,
   _MAX_RESPONSE_AGE,
 )
-from .ErrorTypes import CAPRevocationError
 from .types import (
+  CAPRevocationError,
   PipelineState,
   ValidationContext,
   ValidationStep,
