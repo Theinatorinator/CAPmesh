@@ -42,7 +42,7 @@ class CryptoSignatureStep(ValidationStep):
       signature_config or SignatureConfiguration()
     )
 
-  def __call__(
+  async def __call__(
     self,
     xml_element: etree._Element,
     context: ValidationContext,

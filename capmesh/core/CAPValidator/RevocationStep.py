@@ -23,7 +23,7 @@ class RevocationStep(ValidationStep):
   def __init__(self) -> None:
     pass
 
-  def __call__(
+  async def __call__(
     self,
     xml_element: etree._Element,
     context: ValidationContext,
