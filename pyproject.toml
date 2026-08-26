@@ -31,7 +31,8 @@ dependencies = [
   "rule-engine>=5.0.2",
   "lxml>=6.1.2",
   "signxml>=5.1.0",
-  "cryptography>=50.0.0"
+  "cryptography>=50.0.0",
+  "pyhanko-certvalidator>=0.31.4"
 ]
 
 [project.urls]
