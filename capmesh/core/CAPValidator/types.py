@@ -1,14 +1,13 @@
 import logging
 import typing
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
-from datetime import datetime as dt
-from datetime import timezone as tz
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from cryptography import x509
 from lxml import etree
+from pyhanko_certvalidator import ValidationContext as PyHankoValidationContext
 from signxml.verifier import VerifyResult
 
 # A type alias (PEP 695 style, Python 3.12+/3.13) describing the flexible
@@ -80,7 +79,7 @@ class CAPInternalError(CAPValidationError):
 
 
 @dataclass(frozen=True, slots=True)
-class ValidationContext:
+class CAPValidationContext:
   """Immutable configuration for a single validation run (or a validator
   instance's whole lifetime, since ``CAPCryptoValidator`` is stateless).
 
@@ -106,42 +105,7 @@ class ValidationContext:
           reproducible and testable.
   """
 
-  trusted_certs: list[TrustedCertSource] = field(default_factory=list)
-  use_system_truststore: bool = True
-  require_ocsp_crl: bool = False
-  http_timeout_seconds: float = 5.0
-  verification_time: dt | None = None
-
-  def resolved_trusted_certs(self) -> list[x509.Certificate]:
-    """Normalize :attr:`trusted_certs` into concrete ``x509.Certificate``
-    objects, loading paths/bytes as needed.
-
-    Raises:
-        CAPTrustChainError: If any entry cannot be parsed/loaded.
-    """
-    resolved: list[x509.Certificate] = []
-    for source in self.trusted_certs:
-      try:
-        if isinstance(source, x509.Certificate):
-          resolved.append(source)
-        elif isinstance(source, (str, Path)):
-          raw = Path(source).read_bytes()
-          resolved.append(_load_certificate_bytes(raw))
-        elif isinstance(source, bytes):
-          resolved.append(_load_certificate_bytes(source))
-        else:
-          raise TypeError(
-            f"Unsupported trusted cert source type: {type(source)!r}"
-          )
-      except Exception as exc:  # noqa: BLE001 - normalized below
-        raise CAPTrustChainError(
-          f"Failed to load trusted certificate from {source!r}: {exc}"
-        ) from exc
-    return resolved
-
-  @property
-  def effective_verification_time(self) -> dt:
-    return self.verification_time or dt.now(tz.utc)
+  revocation_context: PyHankoValidationContext = PyHankoValidationContext()
 
 
 @dataclass(frozen=True, slots=True)
@@ -195,7 +159,7 @@ class ValidationStep(ABC):
   async def __call__(
     self,
     xml_element: etree._Element,
-    context: ValidationContext,
+    context: CAPValidationContext,
     state: PipelineState | None,
     **_kwargs: Any,
   ) -> PipelineState:

@@ -12,7 +12,13 @@ from signxml.exceptions import (
 )
 from signxml.verifier import SignatureConfiguration, VerifyResult
 
-from .types import PipelineState, ValidationContext, ValidationStep
+from .types import (
+  CAPSignatureMathError,
+  CAPSignatureSyntaxError,
+  CAPValidationContext,
+  PipelineState,
+  ValidationStep,
+)
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -45,7 +51,7 @@ class CryptoSignatureStep(ValidationStep):
   async def __call__(
     self,
     xml_element: etree._Element,
-    context: ValidationContext,
+    context: CAPValidationContext,
     state: PipelineState | None = None,
     **_kwargs: Any,
   ) -> PipelineState:
@@ -62,6 +68,12 @@ class CryptoSignatureStep(ValidationStep):
         )
       )
 
+      if isinstance(verify_results, list):
+        if len(verify_results) > 1:
+          raise CAPSignatureSyntaxError(
+            "Alert contains more than one signature"
+          )
+
       # verify() returns a list if multiple signatures exist, or a single VerifyResult
       result: VerifyResult = (
         verify_results[0]
@@ -73,12 +85,14 @@ class CryptoSignatureStep(ValidationStep):
       logger.debug(msg="CAP Signature successfully verified.")
 
     except InvalidInput as exc:
-      logger.info(
-        msg=f"Alert is unsigned or signature structure is malformed: {exc}"
-      )
+      raise CAPSignatureSyntaxError(
+        f"Alert is unsigned or signature structure is malformed: {exc}"
+      ) from exc
 
     except (InvalidCertificate, InvalidSignature) as exc:
-      logger.warning(msg=f"CAP Alert signature validation failed: {exc}")
+      raise CAPSignatureMathError(
+        f"CAP Alert signature validation failed: {exc}"
+      ) from exc
 
     except Exception as exc:
       logger.error(

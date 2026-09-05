@@ -40,10 +40,9 @@ import threading
 import typing
 from pathlib import Path
 
-from .CAPSchemaStep import CAPSchemaStep
 from .types import (
+  CAPValidationContext,
   TrustedCertSource,
-  ValidationContext,
   ValidationResult,
   ValidationStep,
 )
@@ -85,7 +84,7 @@ class CAPCryptoValidator:
   """
 
   def __init__(
-    self, context: ValidationContext, steps: list[ValidationStep]
+    self, context: CAPValidationContext, steps: list[ValidationStep]
   ) -> None:
     self._context = context
     self._steps = tuple(steps)
@@ -111,15 +110,7 @@ class CAPCryptoValidator:
     default) mandatory revocation checking. Suitable for authoritative
     alert-origination systems where a false "valid" is unacceptable.
     """
-    context = ValidationContext(
-      trusted_certs=trusted_certs,
-      use_system_truststore=True,
-      require_ocsp_crl=require_revocation,
-    )
-    steps: list[ValidationStep] = [
-      CAPSchemaStep(xsd_path=xsd_path),
-    ]
-    return cls(context, steps)
+    raise NotImplementedError
 
   @classmethod
   def relaxed(
@@ -130,13 +121,7 @@ class CAPCryptoValidator:
     of a high-volume feed before a slower authoritative pass, or for
     offline/air-gapped environments without OCSP/CRL reachability.
     """
-    context = ValidationContext(
-      trusted_certs=trusted_certs,
-      use_system_truststore=True,
-      require_ocsp_crl=False,
-    )
-    steps: list[ValidationStep] = []
-    return cls(context, steps)
+    raise NotImplementedError
 
   # -- main entry point ------------------------------------------------
 
@@ -146,7 +131,7 @@ class CAPCryptoValidator:
     only re-raises ``KeyboardInterrupt``/``SystemExit``/``MemoryError``
     so a worker thread pool isn't silently killed by those.
     """
-    return None
+    raise NotImplementedError
 
   # -- internals ------------------------------------------------------
 

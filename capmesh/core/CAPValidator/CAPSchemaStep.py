@@ -10,9 +10,12 @@ from lxml.etree import XMLSchema, _ElementTree
 from lxml.etree._element import _Element
 from lxml.etree._xmlerror import _ListErrorLog, _LogEntry
 
-from capmesh.core.CAPValidator import PipelineState
-
-from .types import CAPSchemaError, ValidationContext, ValidationStep
+from .types import (
+  CAPSchemaError,
+  CAPValidationContext,
+  PipelineState,
+  ValidationStep,
+)
 
 logger: logging.Logger = logging.getLogger(name=__name__)
 
@@ -57,7 +60,7 @@ class CAPSchemaStep(ValidationStep):
   async def __call__(
     self,
     xml_element: etree._Element,
-    context: ValidationContext,
+    context: CAPValidationContext,
     state: PipelineState | None,
     **_kwargs: Any,
   ) -> PipelineState:
