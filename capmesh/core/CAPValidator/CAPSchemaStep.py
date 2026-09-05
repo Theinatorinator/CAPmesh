@@ -6,9 +6,7 @@ from pathlib import Path
 from typing import Any, Final
 
 from lxml import etree
-from lxml.etree import XMLSchema, _ElementTree
-from lxml.etree._element import _Element
-from lxml.etree._xmlerror import _ListErrorLog, _LogEntry
+from lxml.etree import XMLSchema, _Element, _ElementTree
 
 from .types import (
   CAPSchemaError,
@@ -48,7 +46,7 @@ class CAPSchemaStep(ValidationStep):
       )
       xmlschema_doc = etree.parse(source=Path(xsd_path))
     else:
-      with as_file(path=_get_bundled_schema_path()) as temp_path:
+      with as_file(_get_bundled_schema_path()) as temp_path:
         logger.debug(msg="Loading bundled CAP Schema from package resource")
         xmlschema_doc = etree.parse(source=temp_path)
 
@@ -73,9 +71,9 @@ class CAPSchemaStep(ValidationStep):
     try:
       self._schema.assertValid(etree=xml_element)
     except etree.DocumentInvalid as exc:
-      errors: _ListErrorLog = exc.error_log.filter_from_errors()
+      errors = exc.error_log.filter_from_errors()
 
-      first_error: _LogEntry = errors[0]
+      first_error = errors[0]
       raise CAPSchemaError(
         f"CAP schema validation failed for alert [{alert_id:s}] with {len(errors):i} error(s). "
         f"First error: Line {first_error.line:i}: {first_error.message:s}"
@@ -87,9 +85,9 @@ class CAPSchemaStep(ValidationStep):
     return state
 
   def _log_schema_validation_errors(
-    self, alert_id: str, sender: str, error_log: _ListErrorLog
+    self, alert_id: str, sender: str, error_log: Any
   ) -> None:
-    errors: _ListErrorLog = error_log.filter_from_errors()
+    errors = error_log.filter_from_errors()
     formatted_errors: str = "\n".join(
       f"  - Line {e.line:i}: {e.message:s}" for e in errors
     )

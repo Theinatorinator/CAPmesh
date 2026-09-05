@@ -11,7 +11,6 @@ from cryptography import x509
 from cryptography.hazmat.primitives.serialization import Encoding
 from cryptography.x509 import Certificate
 from lxml import etree
-from lxml.etree._element import _Element
 from pyhanko_certvalidator import CertificateValidator
 from pyhanko_certvalidator.errors import PathValidationError, RevokedError
 
@@ -35,10 +34,7 @@ class RevocationStep(ValidationStep):
   or reachable.
   """
 
-  def __init__(
-    self,
-    trust_roots: list[Certificate] | None = None,
-  ) -> None:
+  def __init__(self) -> None:
     """
     Args:
         trust_roots: Trusted Root/Intermediate CA certificates used to
@@ -65,7 +61,7 @@ class RevocationStep(ValidationStep):
     # 1. Grab signxml results out of the pipeline state.
     state.verification_result.signature_xml
 
-    cert_element: _Element | None = (
+    cert_element: etree._Element | None = (
       state.verification_result.signature_xml.find(
         path="{http://www.w3.org/2000/09/xmldsig#}KeyInfo/"
         "{http://www.w3.org/2000/09/xmldsig#}X509Data/"

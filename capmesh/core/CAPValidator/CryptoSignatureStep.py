@@ -1,18 +1,17 @@
 import logging
-from typing import Any, Final
+from typing import Any
 
 import signxml.verifier as sv
-from cryptography import x509
-from cryptography.x509 import Certificate
 from lxml import etree
 from signxml.exceptions import (
   InvalidCertificate,
   InvalidInput,
   InvalidSignature,
 )
-from signxml.verifier import SignatureConfiguration, VerifyResult
+from signxml.verifier import VerifyResult
 
 from .types import (
+  CAPInternalError,
   CAPSignatureMathError,
   CAPSignatureSyntaxError,
   CAPValidationContext,
@@ -31,22 +30,12 @@ class CryptoSignatureStep(ValidationStep):
   XML tree via state.verification_result.signed_xml.
   """
 
-  __slots__ = ("_signature_config", "_trusted_ca_pem")
-
-  def __init__(
-    self,
-    trusted_ca_pem: Certificate,
-    signature_config: SignatureConfiguration | None = None,
-  ) -> None:
+  def __init__(self) -> None:
     """
     Args:
         trusted_ca_pem: The trusted Root/Intermediate CA bundle.
                         If None, relies on the OS trust store.
     """
-    self._trusted_ca_pem: Final[x509.Certificate] = trusted_ca_pem
-    self._signature_config: SignatureConfiguration = (
-      signature_config or SignatureConfiguration()
-    )
 
   async def __call__(
     self,
@@ -63,8 +52,7 @@ class CryptoSignatureStep(ValidationStep):
       verify_results: VerifyResult | list[VerifyResult] = (
         sv.XMLVerifier().verify(
           data=xml_element,
-          x509_cert=self._trusted_ca_pem,
-          expect_config=self._signature_config,
+          expect_config=context.signature_configuration,
         )
       )
 
@@ -95,8 +83,8 @@ class CryptoSignatureStep(ValidationStep):
       ) from exc
 
     except Exception as exc:
-      logger.error(
-        msg=f"Unexpected error during CAP signature verification: {exc}"
-      )
+      raise CAPInternalError(
+        f"Unexpected error during CAP signature verification: {exc}"
+      ) from exc
 
     return state

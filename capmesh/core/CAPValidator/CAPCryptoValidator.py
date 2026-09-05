@@ -35,14 +35,27 @@ schema conformance.
 
 from __future__ import annotations
 
+import asyncio
+import base64
+import hashlib
 import logging
 import threading
+import time
 import typing
-from pathlib import Path
 
+from cryptography import x509
+from cryptography.hazmat.primitives.serialization import Encoding
+from lxml import etree
+
+from .CAPSchemaStep import CAPSchemaStep
+from .CryptoSignatureStep import CryptoSignatureStep
+from .RevocationStep import RevocationStep
 from .types import (
+  CAPInternalError,
+  CAPSchemaError,
   CAPValidationContext,
-  TrustedCertSource,
+  CAPValidationError,
+  PipelineState,
   ValidationResult,
   ValidationStep,
 )
@@ -101,37 +114,184 @@ class CAPCryptoValidator:
 
   @classmethod
   def strict(
-    cls,
-    trusted_certs: list[TrustedCertSource],
-    require_revocation: bool = True,
-    xsd_path: str | Path | None = None,
+    cls, context: CAPValidationContext | None = None
   ) -> "CAPCryptoValidator":
-    """Full pipeline: schema, signature math, trust chain, and (by
-    default) mandatory revocation checking. Suitable for authoritative
-    alert-origination systems where a false "valid" is unacceptable.
+    """Full pipeline: schema, signature math, trust chain, and mandatory revocation checking.
+    Suitable for authoritative systems where a false "valid" is unacceptable.
     """
-    raise NotImplementedError
+    steps: list[ValidationStep] = [
+      CAPSchemaStep(),
+      CryptoSignatureStep(),
+      RevocationStep(),
+    ]
+
+    return cls(context or CAPValidationContext(), steps)
 
   @classmethod
   def relaxed(
-    cls, trusted_certs: list[TrustedCertSource]
+    cls, context: CAPValidationContext | None = None
   ) -> "CAPCryptoValidator":
-    """Signature math and trust chain only -- skips strict schema
-    validation and revocation checking. Useful for fast pre-filtering
-    of a high-volume feed before a slower authoritative pass, or for
+    """Signature math and trust chain only -- skips online revocation checking. Useful for
     offline/air-gapped environments without OCSP/CRL reachability.
     """
-    raise NotImplementedError
+    steps: list[ValidationStep] = [
+      CAPSchemaStep(),
+      CryptoSignatureStep(),
+    ]
+    return cls(context or CAPValidationContext(), steps)
 
   # -- main entry point ------------------------------------------------
 
-  def verify(self, xml_bytes: bytes) -> ValidationResult | None:
+  def verify(self, xml_bytes: bytes) -> ValidationResult:
     """Run the full pipeline against ``xml_bytes`` and return a
     :class:`ValidationResult`. Never raises for validation failures;
     only re-raises ``KeyboardInterrupt``/``SystemExit``/``MemoryError``
     so a worker thread pool isn't silently killed by those.
     """
-    raise NotImplementedError
+    started = time.perf_counter()
+    metrics: dict[str, typing.Any] = {"step_timings": {}}
+    parsed_alert: dict[str, typing.Any] | None = None
+    errors: list[CAPValidationError] = []
+    xml_element: etree._Element | None = None
+
+    try:
+      parser = etree.XMLParser(
+        resolve_entities=False,
+        no_network=True,
+        load_dtd=False,
+        huge_tree=False,
+      )
+      xml_element = etree.fromstring(xml_bytes, parser=parser)
+      parsed_alert = self._parse_alert(xml_element)
+      state = PipelineState()
+
+      for step in self._steps:
+        step_started = time.perf_counter()
+        try:
+          state = self._run_step(step, xml_element, state)
+          self._fire(self.on_step_complete, step, xml_element, self._context)
+        except CAPValidationError as exc:
+          errors.append(exc)
+          self._fire(
+            self.on_validation_failed, errors, xml_element, self._context
+          )
+          break
+        except (KeyboardInterrupt, SystemExit, MemoryError):
+          raise
+        except Exception as exc:  # noqa: BLE001
+          error = CAPInternalError(
+            f"Validation step {type(step).__name__} failed unexpectedly: {exc}"
+          )
+          errors.append(error)
+          self._fire(
+            self.on_validation_failed, errors, xml_element, self._context
+          )
+          break
+        finally:
+          metrics["step_timings"][type(step).__name__] = (
+            time.perf_counter() - step_started
+          )
+
+      if not errors:
+        metrics["signer_fingerprint_sha256"] = self._signer_fingerprint(state)
+        result = ValidationResult(
+          is_valid=True,
+          errors=[],
+          parsed_alert=parsed_alert,
+          metrics=metrics,
+        )
+        self._fire(
+          self.on_validation_success, result, xml_element, self._context
+        )
+        return self._finish(result, started)
+
+    except (KeyboardInterrupt, SystemExit, MemoryError):
+      raise
+    except Exception as exc:  # noqa: BLE001
+      if isinstance(exc, CAPValidationError):
+        parse_error = exc
+      elif isinstance(exc, etree.XMLSyntaxError):
+        parse_error = CAPSchemaError(f"CAP XML is not well-formed: {exc}")
+      else:
+        parse_error = CAPInternalError(
+          f"Unable to parse or validate CAP alert: {exc}"
+        )
+      errors.append(parse_error)
+      if xml_element is not None:
+        self._fire(
+          self.on_validation_failed, errors, xml_element, self._context
+        )
+
+    result = ValidationResult(
+      is_valid=False,
+      errors=errors,
+      parsed_alert=parsed_alert,
+      metrics=metrics,
+    )
+    return self._finish(result, started)
+
+  def _run_step(
+    self,
+    step: ValidationStep,
+    xml_element: etree._Element,
+    state: PipelineState,
+  ) -> PipelineState:
+    coroutine = step(xml_element, state=state, context=self._context)
+    try:
+      asyncio.get_running_loop()
+    except RuntimeError:
+      return asyncio.run(coroutine)
+
+    result: list[PipelineState] = []
+    failure: list[BaseException] = []
+
+    def run() -> None:
+      try:
+        result.append(asyncio.run(coroutine))
+      except BaseException as exc:
+        failure.append(exc)
+
+    worker = threading.Thread(target=run)
+    worker.start()
+    worker.join()
+    if failure:
+      raise failure[0]
+    return result[0]
+
+  def _finish(
+    self, result: ValidationResult, started: float
+  ) -> ValidationResult:
+    result.metrics["total_seconds"] = time.perf_counter() - started
+    return result
+
+  @staticmethod
+  def _parse_alert(xml_element: etree._Element) -> dict[str, typing.Any]:
+    namespace = etree.QName(xml_element).namespace
+
+    def text(name: str) -> str | None:
+      tag = f"{{{namespace}}}{name}" if namespace else name
+      return xml_element.findtext(tag)
+
+    return {
+      name: text(name)
+      for name in ("identifier", "sender", "sent", "status", "msgType", "scope")
+    }
+
+  @staticmethod
+  def _signer_fingerprint(state: PipelineState) -> str | None:
+    result = state.verification_result
+    if result is None:
+      return None
+    certificate = result.signature_xml.find(
+      "{http://www.w3.org/2000/09/xmldsig#}KeyInfo/"
+      "{http://www.w3.org/2000/09/xmldsig#}X509Data/"
+      "{http://www.w3.org/2000/09/xmldsig#}X509Certificate"
+    )
+    if certificate is None or not certificate.text:
+      return None
+    encoded = base64.b64decode(certificate.text, validate=True)
+    parsed = x509.load_der_x509_certificate(encoded)
+    return hashlib.sha256(parsed.public_bytes(Encoding.DER)).hexdigest()
 
   # -- internals ------------------------------------------------------
 

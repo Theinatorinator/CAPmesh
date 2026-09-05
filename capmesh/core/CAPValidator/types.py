@@ -8,7 +8,7 @@ from typing import Any
 from cryptography import x509
 from lxml import etree
 from pyhanko_certvalidator import ValidationContext as PyHankoValidationContext
-from signxml.verifier import VerifyResult
+from signxml.verifier import SignatureConfiguration, VerifyResult
 
 # A type alias (PEP 695 style, Python 3.12+/3.13) describing the flexible
 # ways trusted certificate material may be supplied.
@@ -106,6 +106,7 @@ class CAPValidationContext:
   """
 
   revocation_context: PyHankoValidationContext = PyHankoValidationContext()
+  signature_configuration: SignatureConfiguration = SignatureConfiguration()
 
 
 @dataclass(frozen=True, slots=True)
