@@ -35,16 +35,11 @@ schema conformance.
 
 from __future__ import annotations
 
-import asyncio
-import base64
-import hashlib
 import logging
-import threading
-import time
 import typing
 
-from cryptography import x509
-from cryptography.hazmat.primitives.serialization import Encoding
+from blinker import signal
+from blinker.base import NamedSignal
 from lxml import etree
 
 from .CAPSchemaStep import CAPSchemaStep
@@ -52,7 +47,6 @@ from .CryptoSignatureStep import CryptoSignatureStep
 from .RevocationStep import RevocationStep
 from .types import (
   CAPInternalError,
-  CAPSchemaError,
   CAPValidationContext,
   CAPValidationError,
   PipelineState,
@@ -99,16 +93,12 @@ class CAPCryptoValidator:
   def __init__(
     self, context: CAPValidationContext, steps: list[ValidationStep]
   ) -> None:
-    self._context = context
-    self._steps = tuple(steps)
-    self.on_step_complete: list[CallbackType] = []
-    self.on_validation_failed: list[CallbackType] = []
-    self.on_validation_success: list[CallbackType] = []
-    # Reentrant lock guarding only the callback lists themselves during
-    # invocation, not the (already-stateless) validation logic -- so
-    # callbacks may safely be added/removed from other threads while a
-    # verify() call is in flight without corrupting iteration.
-    self._callback_lock = threading.RLock()
+    self._context: CAPValidationContext = context
+    self._steps: tuple[ValidationStep, ...] = tuple(steps)
+
+    self.on_step_complete: NamedSignal = signal("step-complete")
+    self.on_validation_failed: NamedSignal = signal("validation-failed")
+    self.on_validation_success: NamedSignal = signal("validation_success")
 
   # -- factories -----------------------------------------------------------
 
@@ -142,164 +132,74 @@ class CAPCryptoValidator:
 
   # -- main entry point ------------------------------------------------
 
-  def verify(self, xml_bytes: bytes) -> ValidationResult:
+  async def verify(self, xml_element: etree._Element) -> ValidationResult:
     """Run the full pipeline against ``xml_bytes`` and return a
     :class:`ValidationResult`. Never raises for validation failures;
     only re-raises ``KeyboardInterrupt``/``SystemExit``/``MemoryError``
     so a worker thread pool isn't silently killed by those.
     """
-    started = time.perf_counter()
-    metrics: dict[str, typing.Any] = {"step_timings": {}}
-    parsed_alert: dict[str, typing.Any] | None = None
     errors: list[CAPValidationError] = []
-    xml_element: etree._Element | None = None
 
+    state: PipelineState = PipelineState()
     try:
-      parser = etree.XMLParser(
-        resolve_entities=False,
-        no_network=True,
-        load_dtd=False,
-        huge_tree=False,
-      )
-      xml_element = etree.fromstring(xml_bytes, parser=parser)
-      parsed_alert = self._parse_alert(xml_element)
-      state = PipelineState()
-
       for step in self._steps:
-        step_started = time.perf_counter()
         try:
-          state = self._run_step(step, xml_element, state)
-          self._fire(self.on_step_complete, step, xml_element, self._context)
+          state = await step(xml_element, state=state, context=self._context)
+          self.on_step_complete.send(
+            self, step=step, xml_element=xml_element, context=self._context
+          )
         except CAPValidationError as exc:
           errors.append(exc)
-          self._fire(
-            self.on_validation_failed, errors, xml_element, self._context
+          self.on_validation_failed.send(
+            self,
+            step=step,
+            errors=errors,
+            xml_element=xml_element,
+            context=self._context,
           )
           break
         except (KeyboardInterrupt, SystemExit, MemoryError):
           raise
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
           error = CAPInternalError(
             f"Validation step {type(step).__name__} failed unexpectedly: {exc}"
           )
           errors.append(error)
-          self._fire(
-            self.on_validation_failed, errors, xml_element, self._context
+          self.on_validation_failed.send(
+            self,
+            step=step,
+            errors=errors,
+            xml_element=xml_element,
+            context=self._context,
           )
           break
-        finally:
-          metrics["step_timings"][type(step).__name__] = (
-            time.perf_counter() - step_started
-          )
 
       if not errors:
-        metrics["signer_fingerprint_sha256"] = self._signer_fingerprint(state)
         result = ValidationResult(
           is_valid=True,
           errors=[],
-          parsed_alert=parsed_alert,
-          metrics=metrics,
+          verification_result=state.verification_result,
         )
-        self._fire(
-          self.on_validation_success, result, xml_element, self._context
+
+        self.on_validation_success.send(
+          self, result=result, xml_element=xml_element, context=self._context
         )
-        return self._finish(result, started)
+        return result
 
     except (KeyboardInterrupt, SystemExit, MemoryError):
       raise
     except Exception as exc:  # noqa: BLE001
-      if isinstance(exc, CAPValidationError):
-        parse_error = exc
-      elif isinstance(exc, etree.XMLSyntaxError):
-        parse_error = CAPSchemaError(f"CAP XML is not well-formed: {exc}")
-      else:
-        parse_error = CAPInternalError(
-          f"Unable to parse or validate CAP alert: {exc}"
-        )
-      errors.append(parse_error)
+      errors.append(
+        CAPInternalError(f"Unable to parse or validate CAP alert: {exc}")
+      )
       if xml_element is not None:
-        self._fire(
-          self.on_validation_failed, errors, xml_element, self._context
+        self.on_validation_failed.send(
+          self, errors=errors, xml_element=xml_element, context=self._context
         )
 
     result = ValidationResult(
       is_valid=False,
       errors=errors,
-      parsed_alert=parsed_alert,
-      metrics=metrics,
+      verification_result=state.verification_result,
     )
-    return self._finish(result, started)
-
-  def _run_step(
-    self,
-    step: ValidationStep,
-    xml_element: etree._Element,
-    state: PipelineState,
-  ) -> PipelineState:
-    coroutine = step(xml_element, state=state, context=self._context)
-    try:
-      asyncio.get_running_loop()
-    except RuntimeError:
-      return asyncio.run(coroutine)
-
-    result: list[PipelineState] = []
-    failure: list[BaseException] = []
-
-    def run() -> None:
-      try:
-        result.append(asyncio.run(coroutine))
-      except BaseException as exc:
-        failure.append(exc)
-
-    worker = threading.Thread(target=run)
-    worker.start()
-    worker.join()
-    if failure:
-      raise failure[0]
-    return result[0]
-
-  def _finish(
-    self, result: ValidationResult, started: float
-  ) -> ValidationResult:
-    result.metrics["total_seconds"] = time.perf_counter() - started
     return result
-
-  @staticmethod
-  def _parse_alert(xml_element: etree._Element) -> dict[str, typing.Any]:
-    namespace = etree.QName(xml_element).namespace
-
-    def text(name: str) -> str | None:
-      tag = f"{{{namespace}}}{name}" if namespace else name
-      return xml_element.findtext(tag)
-
-    return {
-      name: text(name)
-      for name in ("identifier", "sender", "sent", "status", "msgType", "scope")
-    }
-
-  @staticmethod
-  def _signer_fingerprint(state: PipelineState) -> str | None:
-    result = state.verification_result
-    if result is None:
-      return None
-    certificate = result.signature_xml.find(
-      "{http://www.w3.org/2000/09/xmldsig#}KeyInfo/"
-      "{http://www.w3.org/2000/09/xmldsig#}X509Data/"
-      "{http://www.w3.org/2000/09/xmldsig#}X509Certificate"
-    )
-    if certificate is None or not certificate.text:
-      return None
-    encoded = base64.b64decode(certificate.text, validate=True)
-    parsed = x509.load_der_x509_certificate(encoded)
-    return hashlib.sha256(parsed.public_bytes(Encoding.DER)).hexdigest()
-
-  # -- internals ------------------------------------------------------
-
-  def _fire(self, callbacks: list[CallbackType], *args: typing.Any) -> None:
-    with self._callback_lock:
-      snapshot = list(callbacks)
-    for callback in snapshot:
-      try:
-        callback(*args)
-      except Exception:  # noqa: BLE001
-        logger.exception("Observer callback %r raised", callback)

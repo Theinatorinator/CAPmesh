@@ -130,9 +130,8 @@ class ValidationResult:
   """
 
   is_valid: bool
-  errors: list[CAPValidationError]
-  parsed_alert: dict[str, typing.Any] | None
-  metrics: dict[str, typing.Any]
+  errors: list[CAPValidationError] | None
+  verification_result: VerifyResult | None
 
 
 @dataclass
