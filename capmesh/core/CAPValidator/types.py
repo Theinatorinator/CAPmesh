@@ -1,0 +1,181 @@
+import logging
+import typing
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+from cryptography import x509
+from lxml import etree
+from pyhanko_certvalidator import ValidationContext as PyHankoValidationContext
+from signxml.verifier import VerifyResult
+
+# A type alias (PEP 695 style, Python 3.12+/3.13) describing the flexible
+# ways trusted certificate material may be supplied.
+type TrustedCertSource = str | Path | bytes | x509.Certificate
+
+
+logger = logging.getLogger(__name__)
+
+
+def _load_certificate_bytes(raw: bytes) -> x509.Certificate:
+  """Load a certificate from bytes, trying PEM then DER."""
+  try:
+    return x509.load_pem_x509_certificate(raw)
+  except ValueError:
+    return x509.load_der_x509_certificate(raw)
+
+
+class CAPValidationError(Exception):
+  """Base class for all errors raised by the CAP validation pipeline.
+
+  Every step-specific exception below inherits from this so callers can
+  catch ``CAPValidationError`` to handle *any* validation failure while
+  still being able to branch on the specific subtype when useful.
+  """
+
+  #: Machine-readable identifier for the failing pipeline stage, set by
+  #: subclasses so ``ValidationResult`` consumers can group/report errors
+  #: without string-matching class names.
+  stage: typing.ClassVar[str] = "unknown"
+
+
+class CAPTrustChainError(CAPValidationError):
+  """The signer's certificate does not chain to a trusted root."""
+
+  stage = "trust_chain"
+
+
+class CAPSchemaError(CAPValidationError):
+  """The document is not well-formed XML or fails XSD schema validation."""
+
+  stage = "schema"
+
+
+class CAPSignatureSyntaxError(CAPValidationError):
+  """No usable ``<ds:Signature>`` element could be located or parsed."""
+
+  stage = "signature_syntax"
+
+
+class CAPSignatureMathError(CAPValidationError):
+  """The cryptographic signature (digest and/or signature value) is invalid."""
+
+  stage = "signature_math"
+
+
+class CAPRevocationError(CAPValidationError):
+  """The signer's certificate is revoked, or revocation status is unknown
+  and the context requires a definitive answer."""
+
+  stage = "revocation"
+
+
+class CAPInternalError(CAPValidationError):
+  """An unexpected error occurred inside a pipeline step. Wraps the
+  original exception in ``__cause__``."""
+
+  stage = "internal"
+
+
+@dataclass(frozen=True, slots=True)
+class CAPValidationContext:
+  """Immutable configuration for a single validation run (or a validator
+  instance's whole lifetime, since ``CAPCryptoValidator`` is stateless).
+
+  Attributes:
+      trusted_certs: Trust anchors. Each entry may be a filesystem path
+          (``str``/``Path``) to a PEM/DER file, raw PEM ``bytes``, or an
+          already-parsed ``cryptography.x509.Certificate``. Steps that
+          need a concrete list of ``x509.Certificate`` objects should call
+          :meth:`resolved_trusted_certs`.
+      use_system_truststore: When ``True``, the OS trust store (via
+          ``truststore``) is consulted *in addition to* ``trusted_certs``
+          for chain validation.
+      require_ocsp_crl: When ``True``, revocation status must be
+          affirmatively obtained (OCSP or CRL) or validation fails.
+          When ``False``, revocation is checked on a best-effort basis:
+          confirmed revocation still fails validation, but an
+          unreachable/indeterminate responder does not.
+      http_timeout_seconds: Timeout applied to all outbound OCSP/CRL
+          HTTP fetches.
+      verification_time: The instant to use for signature/certificate
+          validity-period checks. Defaults to "now" if left ``None``;
+          exposed explicitly so revalidation of historical alerts is
+          reproducible and testable.
+  """
+
+  revocation_context: PyHankoValidationContext = PyHankoValidationContext()
+
+
+@dataclass(frozen=True, slots=True)
+class ValidationResult:
+  """The outcome of running :meth:`CAPCryptoValidator.verify`.
+
+  Attributes:
+      is_valid: ``True`` only if every pipeline step completed without
+          raising a ``CAPValidationError``.
+      errors: All validation errors encountered, in pipeline order.
+          Empty when ``is_valid`` is ``True``.
+      parsed_alert: A shallow dict of the CAP ``<alert>`` fields that were
+          successfully extracted (identifier, sender, sent, status,
+          msgType, scope), or ``None`` if the document could not be
+          parsed far enough to extract them.
+      metrics: Timing and diagnostic data: per-step wall-clock duration
+          in seconds (``step_timings``), the total duration
+          (``total_seconds``), and the resolved signer certificate
+          fingerprint if signature verification succeeded
+          (``signer_fingerprint_sha256``).
+  """
+
+  is_valid: bool
+  errors: list[CAPValidationError]
+  parsed_alert: dict[str, typing.Any] | None
+  metrics: dict[str, typing.Any]
+
+
+@dataclass
+class PipelineState:
+  """Mutable scratch space threaded through one ``verify()`` call so
+  steps can hand results to later steps (e.g. the certificate extracted
+  by signature verification is needed by trust-chain and revocation
+  checks). This object is created fresh per call and never shared across
+  threads or across calls.
+  """
+
+  signed_xml: typing.Any = None
+  verification_result: VerifyResult | None = None
+
+
+class ValidationStep(ABC):
+  """A single stage in the validation pipeline.
+
+  Implementations must be safe to call concurrently from multiple threads
+  against different ``xml_element``/``context`` pairs -- i.e. they should
+  not mutate shared instance state during ``__call__``.
+  """
+
+  @abstractmethod
+  async def __call__(
+    self,
+    xml_element: etree._Element,
+    context: CAPValidationContext,
+    state: PipelineState | None,
+    **_kwargs: Any,
+  ) -> PipelineState:
+    """Validate one aspect of ``xml_element``.
+
+    Implementations communicate cross-step results (e.g. the extracted
+    signer certificate) via the *shared* ``PipelineState`` object that
+    ``CAPCryptoValidator.verify`` threads through as a positional
+    attribute on the element via ``xml_element.getroottree()`` docinfo
+    is avoided by convention -- instead, steps that need to share data
+    receive it through :class:`PipelineState`, injected as the third
+    positional parameter, after ``context``, by the runner. See ``CryptoSignatureStep`` /
+    ``TrustChainStep`` for the concrete contract.
+
+    Raises:
+        CAPValidationError: on any validation failure. Subclasses
+            should raise the most specific exception type available.
+    """
+    ...

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
+    <identifier>KS-TYLERTECH-WEA-1787607601677</identifier>
+    <sender>FEMA.IPAWS@KBI.KS.Gov</sender>
+    <sent>2026-08-24T16:40:01-05:00</sent>
+    <status>Actual</status>
+    <msgType>Alert</msgType>
+    <source>Kansas Bureau of Investigation AMBER Program</source>
+    <scope>Public</scope>
+    <code>IPAWSv1.0</code>
+    <info>
+        <language>en-US</language>
+        <category>Other</category>
+        <event>Child Abduction Emergency</event>
+        <responseType>Monitor</responseType>
+        <urgency>Immediate</urgency>
+        <severity>Extreme</severity>
+        <certainty>Observed</certainty>
+        <eventCode>
+            <valueName>SAME</valueName>
+            <value>CAE</value>
+        </eventCode>
+        <effective>2026-08-24T16:40:01-05:00</effective>
+        <onset>2026-08-24T16:40:01-05:00</onset>
+        <expires>2026-08-25T16:40:01-05:00</expires>
+        <senderName>Kansas Bureau of Investigation AMBER Program</senderName>
+        <parameter>
+            <valueName>EAS-ORG</valueName>
+            <value>CIV</value>
+        </parameter>
+        <parameter>
+            <valueName>BLOCKCHANNEL</valueName>
+            <value>EAS</value>
+        </parameter>
+        <parameter>
+            <valueName>WEAHandling</valueName>
+            <value>Amber</value>
+        </parameter>
+        <parameter>
+            <valueName>CMAMtext</valueName>
+            <value>TEST -- Monthly IPAWS WEA Test small text</value>
+        </parameter>
+        <parameter>
+            <valueName>CMAMlongtext</valueName>
+            <value>TEST -- Monthly IPAWS WEA Test long text</value>
+        </parameter>
+        <parameter>
+            <valueName>BLOCKCHANNEL</valueName>
+            <value>NWEM</value>
+        </parameter>
+        <parameter>
+            <valueName>timezone</valueName>
+            <value>CST</value>
+        </parameter>
+        <area>
+            <areaDesc>Shawnee County</areaDesc>
+            <geocode>
+                <valueName>SAME</valueName>
+                <value>020177</value>
+            </geocode>
+        </area>
+    </info>
+    <capSig:Signature xmlns:capSig="http://www.w3.org/2000/09/xmldsig#"
+        xmlns:ns4="http://gov.fema.ipaws.services/capresponse"
+        xmlns:ns3="urn:oasis:names:tc:emergency:cap:1.2">
+        <capSig:SignedInfo>
+            <capSig:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+            <capSig:SignatureMethod
+                Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" />
+            <capSig:Reference URI="">
+                <capSig:Transforms>
+                    <capSig:Transform
+                        Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+                </capSig:Transforms>
+                <capSig:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+                <capSig:DigestValue>Cw5LMgib1tCmItasTdCLnNZj1xvV/4JdJWcL2uVN8sY=</capSig:DigestValue>
+            </capSig:Reference>
+        </capSig:SignedInfo>
+        <capSig:SignatureValue>Zl6bx3Nr8RkbsaqvJx8bmsk+pJx8gpnw9QETwYnUePUBZUs6S98737MhCsQcHFwX8vVOprGVFt6W
+            /nitd1VYYN3KS+HvMrBEV4nX2Txz6tOq0Sa0asq5LDUw0mOwMzjfUKB1v6nAyYscif37uHyxKyRB
+            U8ws99UzgWTC9pImVGnziqGq/XsE6xh2bTsWL/wH7loTlvvgCxxJYqSIfZde9IEmturzyPv6a368
+            bMqH4JOqSLEhdcoK+vl9xucDLRmKBAAe0LIfoP0LC4ChsABuUHiazvyYvBqmQ7fJe6bD8Gzv0epu
+            iciKOWfOUgMJcvS9DX9AaZjh1pPoZ8JRpFqeGA==</capSig:SignatureValue>
+        <capSig:KeyInfo>
+            <capSig:X509Data>
+                <capSig:X509SubjectName>CN=IPAWSOPEN120176,OU=A0141320000019AEFCC8F160000026B,OU=Devices
+                    IPAWS,OU=National Continuity Programs,O=FEMA IPAWS,C=US</capSig:X509SubjectName>
+                <capSig:X509Certificate>MIIHXDCCBUSgAwIBAgIQQAGa78yPbP4y9ALm/53k4jANBgkqhkiG9w0BAQsFADBpMQswCQYDVQQG
+                    EwJVUzEWMBQGA1UEChMNcHRlIElkZW5UcnVzdDEkMCIGA1UECxMbcHRlIElkZW5UcnVzdCBHbG9i
+                    YWwgQ29tbW9uMRwwGgYDVQQDExNwdGUgSUdDIERldmljZSBDQSAyMB4XDTI1MTIwNTE4MzU1MloX
+                    DTI4MTIwNDE4MzQ1MlowgaUxCzAJBgNVBAYTAlVTMRMwEQYDVQQKEwpGRU1BIElQQVdTMSUwIwYD
+                    VQQLExxOYXRpb25hbCBDb250aW51aXR5IFByb2dyYW1zMRYwFAYDVQQLEw1EZXZpY2VzIElQQVdT
+                    MSgwJgYDVQQLEx9BMDE0MTMyMDAwMDAxOUFFRkNDOEYxNjAwMDAwMjZCMRgwFgYDVQQDEw9JUEFX
+                    U09QRU4xMjAxNzYwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCzkU0NVxMEoJqemVMX
+                    r7dnHt5CwDB1SDDAnpRaejLwt/ejP8hXGiAufNBGr4F93j/BdMLPnFGZaWw8b2G9nLl7iEA/D0bf
+                    ht5cwZN+4LLpBvigTMdKpAkHX6g/q52IblrzYyxDyF1vDj9v5Hka4MhURocte9g+VYnIlQrvSOh2
+                    5YMcvX0mroViYpRI1DSXlTYhL1Bh5YDC9GWkyFesFkytMOD7n5bSevNuvwAxWmuAPueWLTuu1w8N
+                    pAqFOt9TQA9Gldhd6euXPAVQkV9QU8ruOhjqoqiU40DYgvDm0K8MwUCdXLU8SLdfsOIXI/ejxwjL
+                    D3OCn+jp9hPgyD6iUdxZAgMBAAGjggLBMIICvTAOBgNVHQ8BAf8EBAMCBaAwgYEGCCsGAQUFBwEB
+                    BHUwczAvBggrBgEFBQcwAYYjaHR0cDovL0lHQ0NBMVBURS5vY3NwLmlkZW50cnVzdC5jb20wQAYI
+                    KwYBBQUHMAKGNGh0dHA6Ly9hcHBzLXN0Zy5pZGVudHJ1c3QuY29tL2NlcnRzL2lnY2RldmljZWNh
+                    Mi5wN2MwHwYDVR0jBBgwFoAUFN7S2bbzzbgZecyksutCladGQuUwggFSBgNVHSAEggFJMIIBRTCC
+                    AUEGC2CGSAGG+S8AZCUCMIIBMDBLBggrBgEFBQcCARY/aHR0cHM6Ly9zZWN1cmUuaWRlbnRydXN0
+                    LmNvbS9jZXJ0aWZpY2F0ZXMvcG9saWN5L0lHQy9pbmRleC5odG1sMIHgBggrBgEFBQcCAjCB0wyB
+                    0FRlc3QgQ2VydGlmaWNhdGUuIERvIE5vIFJlbHkuIENlcnRpZmljYXRlIHVzZSByZXN0cmljdGVk
+                    IHRvIFJlbHlpbmcgUGFydHkocykgaW4gYWNjb3JkYW5jZSB3aXRoIElHQy1DUCAoc2VlIGh0dHBz
+                    Oi8vc2VjdXJlLmlkZW50cnVzdC5jb20vY2VydGlmaWNhdGVzL3BvbGljeS9JR0MvaW5kZXguaHRt
+                    bCkuIElHQy1DUFMgaW5jb3Jwb3JhdGVkIGJ5IHJlZmVyZW5jZS4wQgYDVR0fBDswOTA3oDWgM4Yx
+                    aHR0cDovL2NybC1wdGUuaWRlbnRydXN0LmNvbS9jcmwvaWdjZGV2aWNlY2EyLmNybDAaBgNVHREE
+                    EzARgg9JUEFXU09QRU4xMjAxNzYwHQYDVR0OBBYEFBxCPj47qlBXpMeMh37pMDmw4tJaMDEGA1Ud
+                    JQQqMCgGCCsGAQUFBwMCBggrBgEFBQcDBQYIKwYBBQUHAwYGCCsGAQUFBwMHMA0GCSqGSIb3DQEB
+                    CwUAA4ICAQCjkd2M+hkNxxu2xJ5QqFXFhW5fI/BuKz4IefJbUozOzmRRpnE2Nc9mZWkBwFVSFYwl
+                    uxbjo/agrR1As9JhY+OAjaZyn03+a3smEqrqytyAjx4AM3IF84gixi4vocsLGvvnUHvbn8lAfkA6
+                    7VQZodH/NIvnxvv+muf3gklXX4Y7XmCU0Sq3KHecF3/rp7J81812w4BP6Js5icinutVyPVNdFHNx
+                    21eXztHOrKGm+Lz1uialtahTzFQt34HveJEoRYMQqZWGYtOfFDL2mfk/nLXjqgFh730tN/QeeSLA
+                    xTM5E3wq8FyLMVG+o8hqN4IBBT3e7QbZYrr6ovQ4/Cx4KEsuFtI2xOQ42I5Vpcn9jXtp/bcP7l+3
+                    FGQXufQaBjq+Im/Vz6rIhBBEyV2RBhrAw+Jy5km1NMUcULcnJ2bbn7rmG9BxpetJFU9NVO2HEVfr
+                    FGhn8BhRjokf8s12Ez5d7pSHN2nyLjQjhL3YmHHlyK8zZDeym64ldp/k1HsHPU5xctWsxEWzfpMf
+                    NDgBqjQX+/5fwXX5qs2M4dR04QwklTokC1a8JbR53aYTZkYgIQ4R91GLrTSokGe0Hr9DDVoFP+Se
+                    5O8+64g2oOR5hyYzI8PQIZqZF9FRd2jjLMYulUBa2ycHa3oZ0NqVJeTKQWoJvJ6hhxRYLqni48tk
+                    G3EA3J6uNQ==</capSig:X509Certificate>
+            </capSig:X509Data>
+        </capSig:KeyInfo>
+    </capSig:Signature>
+</alert>

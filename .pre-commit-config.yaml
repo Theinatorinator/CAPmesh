@@ -42,7 +42,7 @@ repos:
       - id: trailing-whitespace
         types: [python]
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.17.0 # Use the latest version or a specific version
+    rev: v4.18.0 # Use the latest version or a specific version
     hooks:
       - id: commitizen
         stages: [commit-msg]
