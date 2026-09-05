@@ -170,8 +170,8 @@ class ValidationStep(ABC):
     ``CAPCryptoValidator.verify`` threads through as a positional
     attribute on the element via ``xml_element.getroottree()`` docinfo
     is avoided by convention -- instead, steps that need to share data
-    receive it through :class:`PipelineState`, injected as a second
-    parameter by the runner. See ``CryptoSignatureStep`` /
+    receive it through :class:`PipelineState`, injected as the third
+    positional parameter, after ``context``, by the runner. See ``CryptoSignatureStep`` /
     ``TrustChainStep`` for the concrete contract.
 
     Raises:
