@@ -8,10 +8,8 @@ updates:
       time: "09:00"
       timezone: "UTC"
     open-pull-requests-limit: 10
-    reviewers:
-      - "Theinatorinator"
     assignees:
-      - "Theinatorinator"
+      - "TheInatorInator"
     commit-message:
       prefix: "chore(deps)"
       include: "scope"
@@ -27,10 +25,8 @@ updates:
       time: "09:00"
       timezone: "UTC"
     open-pull-requests-limit: 10
-    reviewers:
-      - "your-github-username"
     assignees:
-      - "your-github-username"
+      - "TheInatorInator"
     commit-message:
       prefix: "chore(ci)"
       include: "scope"
