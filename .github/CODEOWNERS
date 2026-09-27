@@ -1,0 +1,10 @@
+# .github/CODEOWNERS
+
+# Assign you as reviewer for Python dependency updates
+/pyproject.toml @TheInatorInator
+/uv.lock @TheInatorInator
+/requirements.txt @TheInatorInator
+
+# Assign you as reviewer for GitHub Actions updates
+/.github/workflows/ @TheInatorInator
+/.github/actions/ @TheInatorInator
