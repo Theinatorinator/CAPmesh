@@ -398,7 +398,7 @@ requires-dist = [
     { name = "paho-mqtt", specifier = ">=2.1.0" },
     { name = "pydantic", specifier = ">=2.14.1" },
     { name = "pydantic-settings", specifier = ">=2.16.0" },
-    { name = "pyhanko-certvalidator", specifier = ">=0.31.4" },
+    { name = "pyhanko-certvalidator", specifier = ">=0.33.0" },
     { name = "python-dateutil", specifier = ">=2.9.0.post0" },
     { name = "rich", specifier = ">=14" },
     { name = "rule-engine", specifier = ">=5.1.0" },
@@ -2014,7 +2014,7 @@ wheels = [
 
 [[package]]
 name = "pyhanko-certvalidator"
-version = "0.32.1"
+version = "0.33.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -2024,9 +2024,9 @@ dependencies = [
     { name = "oscrypto" },
     { name = "uritools" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2d/94/559f4ffadb51fbc33d0ce8cee34f1a32f1ee6d4ada3495d6e7ef1c9d1a0c/pyhanko_certvalidator-0.32.1.tar.gz", hash = "sha256:4780e5697f9d8a02fb4648a1b8f2cd0df67615cae491298491467ca53c0fc08d", size = 597230, upload-time = "2026-09-10T05:50:23.783Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7f/49/f6ec683b23c1275940c2f68490b2bfbfe6ed246b50b7108561ef21678372/pyhanko_certvalidator-0.33.0.tar.gz", hash = "sha256:a4c3309f99c77cdcad24532f75340bd8cc8b108aa8992b8102d44f250ebd449c", size = 602367, upload-time = "2026-10-17T20:30:49.128Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f4/49/81f92016547077d004a883864da9148e725741f365064a1c9dfe5558f49a/pyhanko_certvalidator-0.32.1-py3-none-any.whl", hash = "sha256:76100cdda13bd085beaa94d4b9080fe6f4ee67248976ec9a19c4d58642558a2b", size = 115685, upload-time = "2026-09-10T05:50:22.023Z" },
+    { url = "https://files.pythonhosted.org/packages/e8/22/fc8a485269187b85eadd2cf536b92be403a238932e7d3943ba176fb31041/pyhanko_certvalidator-0.33.0-py3-none-any.whl", hash = "sha256:72d3b830c0427a7aae45873ba7b4e34cb86caed451eff9dfb4394a69e93bb169", size = 118831, upload-time = "2026-10-17T20:30:47.557Z" },
 ]
 
 [[package]]
