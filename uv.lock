@@ -401,7 +401,7 @@ requires-dist = [
     { name = "pyhanko-certvalidator", specifier = ">=0.31.4" },
     { name = "python-dateutil", specifier = ">=2.9.0.post0" },
     { name = "rich", specifier = ">=14" },
-    { name = "rule-engine", specifier = ">=5.0.2" },
+    { name = "rule-engine", specifier = ">=5.1.0" },
     { name = "signxml", specifier = ">=5.2.0" },
     { name = "sqlmodel", specifier = ">=0.0.48" },
     { name = "tenacity", specifier = ">=9.2.1" },
@@ -2311,14 +2311,14 @@ wheels = [
 
 [[package]]
 name = "rule-engine"
-version = "5.0.2"
+version = "5.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "python-dateutil" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ef/1e/b77a11130c48cc37ba6a64f0fe8b6c5585923975d4cc8f5184cf5f7172dc/rule_engine-5.0.2.tar.gz", hash = "sha256:dd871030a2eee062f3869fa952c3b93dbf56b21c8c01b73ca71e4c3ac8c5a4ea", size = 95940, upload-time = "2026-07-08T00:11:06.59Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/56/07/0b312a26b32a4e8a8d046ce44d218d26de84fda43eec4973692c9ca07a43/rule_engine-5.1.0.tar.gz", hash = "sha256:a5f7f0a406fd643168c251677499c06a58815b24e728ec5f4cd99fc263c75c1e", size = 99667, upload-time = "2026-10-20T12:51:32.152Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/77/b5/d81a48d940e0266974b37fea1a5ebaff8d88735fbded899ce1cc043be682/rule_engine-5.0.2-py3-none-any.whl", hash = "sha256:93e3bc62742a3463d8361071c4e6b3c6d55393835822825375b2ed9d766141d7", size = 135032, upload-time = "2026-07-08T00:11:05.174Z" },
+    { url = "https://files.pythonhosted.org/packages/91/8f/67ec6718b89402f5fe80f70eacb4cc3ce024137cf579cc15d027dfa1fce5/rule_engine-5.1.0-py3-none-any.whl", hash = "sha256:32d04cf7a8d37a6b255604fc6fa687a075310506c466ae72a44f9efa551fbb96", size = 140117, upload-time = "2026-10-20T12:51:30.846Z" },
 ]
 
 [[package]]
